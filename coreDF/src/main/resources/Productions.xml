@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- The list of available systems -->
+<ListOfVersion>
+    <ProductVersion>
+        <SystemName>GL</SystemName>
+        <!-- IdentificationName = select ... as CURRENTPRODUCTVERSION from ... -->
+        <!-- IdentificationName = \server\...xml -> "<DataBaseProduct> <ProductVersion>" -->
+        <IdentificationName>5NT(e) 3.6.1</IdentificationName>
+        <ShortName>GL</ShortName>
+    </ProductVersion>
+    <ProductVersion>
+        <SystemName>D359</SystemName>
+        <IdentificationName>5NT(e) 3.5.91</IdentificationName>
+        <ShortName>3.5.9</ShortName>
+    </ProductVersion>
+    <ProductVersion>
+        <SystemName>PE</SystemName>
+        <IdentificationName>PE R69</IdentificationName>
+        <ShortName>PE</ShortName>
+    </ProductVersion>
+    <ProductVersion>
+        <SystemName>PGMR</SystemName>
+        <IdentificationName>PGMR jerboa 1.0</IdentificationName>
+        <ShortName>PGMR</ShortName>
+    </ProductVersion>
+    <ProductVersion>
+        <SystemName>DWH_MFO</SystemName>
+        <IdentificationName>DWH MFO 1.0</IdentificationName>
+        <ShortName>DWH(MFO)</ShortName>
+    </ProductVersion>
+</ListOfVersion>

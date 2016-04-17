@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<LegendTableModel>
+    <Column>
+        <ColumnName>Номер</ColumnName>
+        <ColumnWidth>15</ColumnWidth>
+        <WidthHTML>50</WidthHTML>
+        <DefaultSummaryValue>Итого:</DefaultSummaryValue>
+        <KeyData>rowNumber</KeyData>
+        <Summable>false</Summable>
+    </Column>
+    <Column>
+        <ColumnName>Тип расхождения</ColumnName>
+        <ColumnWidth>60</ColumnWidth>
+        <ColumnNameHTML>Тип&lt;br&gt;расхождения</ColumnNameHTML>
+        <WidthHTML>150</WidthHTML>
+        <KeyData>diffType</KeyData>
+        <Summable>false</Summable>
+    </Column>
+    <Column>
+        <ColumnName>Номер счета</ColumnName>
+        <ColumnWidth>100</ColumnWidth>
+        <ColumnNameHTML>Номер&lt;br&gt;счета</ColumnNameHTML>
+        <WidthHTML>180</WidthHTML>
+        <KeyData>resourceNumber</KeyData>
+        <Summable>false</Summable>
+    </Column>
+    <Column>
+        <ColumnName>Остаток в GL</ColumnName>
+        <ColumnWidth>40</ColumnWidth>
+        <ColumnNameHTML>Сумма остатка на счёте в GL</ColumnNameHTML>
+        <WidthHTML>120</WidthHTML>
+        <KeyData>restGL</KeyData>
+        <Summable>true</Summable>
+    </Column>
+    <Column>
+        <ColumnName>Остаток в 3.5.9</ColumnName>
+        <ColumnWidth>40</ColumnWidth>
+        <ColumnNameHTML>Сумма остатка на счёте в 3.5.91</ColumnNameHTML>
+        <WidthHTML>120</WidthHTML>
+        <KeyData>restMaster</KeyData>
+        <Summable>true</Summable>
+    </Column>
+    <Column>
+        <ColumnName>Дельта (отрицательная, если остаток в GL меньше)</ColumnName>
+        <ColumnWidth>0</ColumnWidth>
+        <ColumnNameHTML>Дельта&lt;br&gt;(отрицательная,&lt;br&gt; если остаток&lt;br&gt;в GL меньше)</ColumnNameHTML>
+        <WidthHTML>120</WidthHTML>
+        <KeyData>deltaRest</KeyData>
+        <Summable>true</Summable>
+    </Column>
+    <CaptionLineHTML>&lt;html&gt;</CaptionLineHTML>
+    <CaptionLineHTML>&lt;head&gt;</CaptionLineHTML>
+    <CaptionLineHTML>&lt;meta http-equiv="Content-Type" content="charset=windows-1251"&gt;</CaptionLineHTML>
+    <CaptionLineHTML>&lt;/head&gt;</CaptionLineHTML>
+    <CaptionLineHTML>&lt;body&gt;</CaptionLineHTML>
+    <CaptionLineHTML>&lt;table border="1" width="50" height="30"&gt;</CaptionLineHTML>
+    <CaptionLineHTML>&lt;caption&gt;</CaptionLineHTML>
+    <CaptionLineHTML>&lt;b&gt;&lt;br&gt;%1$s&lt;/b&gt;</CaptionLineHTML>
+    <CaptionLineHTML>&lt;b&gt;&lt;br&gt;&lt;/b&gt;</CaptionLineHTML>
+    <CaptionLineHTML>&lt;b&gt;&lt;br&gt;&lt;/b&gt;</CaptionLineHTML>
+    <CaptionLineHTML>&lt;/caption&gt;</CaptionLineHTML>
+    <TailLineHTML>&lt;/table&gt;</TailLineHTML>
+    <TailLineHTML>&lt;/body&gt;</TailLineHTML>
+    <TailLineHTML>&lt;/html&gt;</TailLineHTML>
+</LegendTableModel>

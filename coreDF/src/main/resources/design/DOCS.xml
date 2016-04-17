@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<LegendTableModel>
+    <Column>
+        <ColumnName>Номер</ColumnName>
+        <ColumnWidth>0</ColumnWidth>
+        <WidthHTML>50</WidthHTML>
+        <DefaultSummaryValue>Итого:</DefaultSummaryValue>
+        <KeyData>rowNumber</KeyData>
+        <Summable>false</Summable>
+    </Column>
+    <Column>
+        <ColumnName>Тип расхождения</ColumnName>
+        <ColumnWidth>0</ColumnWidth>
+        <ColumnNameHTML>Тип&lt;br&gt;расхождения</ColumnNameHTML>
+        <WidthHTML>150</WidthHTML>
+        <KeyData>diffType</KeyData>
+        <Summable>false</Summable>
+    </Column>
+    <Column>
+        <ColumnName>Счёт</ColumnName>
+        <ColumnWidth>0</ColumnWidth>
+        <ColumnNameHTML>Номер&lt;br&gt;счета</ColumnNameHTML>
+        <WidthHTML>360</WidthHTML>
+        <KeyData>resourceNumber</KeyData>
+        <Summable>false</Summable>
+    </Column>
+    <Column>
+        <ColumnName>Межсистемный идентификатор документа</ColumnName>
+        <ColumnWidth>0</ColumnWidth>
+        <ColumnNameHTML>Межсистемный&lt;br&gt;идентификатор&lt;br&gt;документа</ColumnNameHTML>
+        <WidthHTML>330</WidthHTML>
+        <KeyData>externalID</KeyData>
+        <Summable>false</Summable>
+    </Column>
+    <Column>
+        <ColumnName>Сумма</ColumnName>
+        <ColumnWidth>0</ColumnWidth>
+        <WidthHTML>120</WidthHTML>
+        <KeyData>docAmount</KeyData>
+        <Summable>true</Summable>
+    </Column>
+    <Column>
+        <ColumnName>Номер документа</ColumnName>
+        <ColumnWidth>0</ColumnWidth>
+        <WidthHTML>80</WidthHTML>
+        <KeyData>docNumber</KeyData>
+        <Summable>false</Summable>
+    </Column>
+    <Column>
+        <ColumnName>Внутренний идентификатор документа</ColumnName>
+        <ColumnWidth>0</ColumnWidth>
+        <ColumnNameHTML>Внутренний&lt;br&gt;идентификатор&lt;br&gt;документа</ColumnNameHTML>
+        <WidthHTML>110</WidthHTML>
+        <KeyData>docID</KeyData>
+        <Summable>false</Summable>
+    </Column>
+    <Column>
+        <ColumnName>Дельта (отрицательная,  если оборот в GL меньше)</ColumnName>
+        <ColumnWidth>0</ColumnWidth>
+        <ColumnNameHTML>Дельта&lt;br&gt;(отрицательная,&lt;br&gt; если оборот&lt;br&gt;в GL меньше)</ColumnNameHTML>
+        <WidthHTML>120</WidthHTML>
+        <KeyData>deltaAmountDoc</KeyData>
+        <Summable>true</Summable>
+    </Column>
+    <Column>
+        <ColumnName>Детализация атрибутов документа</ColumnName>
+        <ColumnWidth>0</ColumnWidth>
+        <ColumnNameHTML>Детализация&lt;br&gt;атрибутов&lt;br&gt;документа</ColumnNameHTML>
+        <WidthHTML>600</WidthHTML>
+        <KeyData>detailMesssage</KeyData>
+        <Summable>false</Summable>
+    </Column>
+    <CaptionLineHTML>&lt;html&gt;</CaptionLineHTML>
+    <CaptionLineHTML>&lt;head&gt;</CaptionLineHTML>
+    <CaptionLineHTML>&lt;meta http-equiv="Content-Type" content="charset=windows-1251"&gt;</CaptionLineHTML>
+    <CaptionLineHTML>&lt;/head&gt;</CaptionLineHTML>
+    <CaptionLineHTML>&lt;body&gt;</CaptionLineHTML>
+    <CaptionLineHTML>&lt;table border="1" width="50" height="30"&gt;</CaptionLineHTML>
+    <CaptionLineHTML>&lt;caption&gt;</CaptionLineHTML>
+    <CaptionLineHTML>&lt;b&gt;&lt;br&gt;%1$s&lt;/b&gt;</CaptionLineHTML>
+    <CaptionLineHTML>&lt;b&gt;&lt;br&gt;&lt;/b&gt;</CaptionLineHTML>
+    <CaptionLineHTML>&lt;b&gt;&lt;br&gt;&lt;/b&gt;</CaptionLineHTML>
+    <CaptionLineHTML>&lt;/caption&gt;</CaptionLineHTML>
+    <TailLineHTML>&lt;/table&gt;</TailLineHTML>
+    <TailLineHTML>&lt;/body&gt;</TailLineHTML>
+    <TailLineHTML>&lt;/html&gt;</TailLineHTML>
+</LegendTableModel>

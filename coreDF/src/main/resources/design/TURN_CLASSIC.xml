@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<LegendTableModel>
+    <Column>
+        <ColumnName>Тип расхождения</ColumnName>
+        <ColumnWidth>90</ColumnWidth>
+        <DefaultSummaryValue>Итого:</DefaultSummaryValue>
+        <KeyData>diffType</KeyData>
+        <Summable>false</Summable>
+    </Column>
+    <Column>
+        <ColumnName>Пачка</ColumnName>
+        <ColumnWidth>50</ColumnWidth>
+        <KeyData>batchBrief</KeyData>
+        <Summable>false</Summable>
+    </Column>
+    <Column>
+        <ColumnName>Счет дебет</ColumnName>
+        <ColumnWidth>120</ColumnWidth>
+        <KeyData>debResNumber</KeyData>
+        <Summable>false</Summable>
+    </Column>
+    <Column>
+        <ColumnName>Счет кредит</ColumnName>
+        <ColumnWidth>120</ColumnWidth>
+        <KeyData>creResNumber</KeyData>
+        <Summable>false</Summable>
+    </Column>
+    <Column>
+        <ColumnName>Сумма док-та</ColumnName>
+        <ColumnWidth>40</ColumnWidth>
+        <KeyData>turnAmount</KeyData>
+        <Summable>true</Summable>
+    </Column>
+    <Column>
+        <ColumnName>DealTransactID</ColumnName>
+        <ColumnWidth>50</ColumnWidth>
+        <KeyData>docID</KeyData>
+        <Summable>false</Summable>
+    </Column>
+    <Column>
+        <ColumnName>ExternalDocID</ColumnName>
+        <ColumnWidth>0</ColumnWidth>
+        <KeyData>externalID</KeyData>
+        <Summable>false</Summable>
+    </Column>
+</LegendTableModel>

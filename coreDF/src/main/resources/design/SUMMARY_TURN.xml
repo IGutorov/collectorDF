@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<LegendTableModel>
+    <Column>
+        <ColumnName>Счёт</ColumnName>
+        <ColumnWidth>45</ColumnWidth>
+        <DefaultSummaryValue>Итого:</DefaultSummaryValue>
+        <KeyData>mainCriterion</KeyData>
+        <Summable>false</Summable>
+    </Column>
+    <Column>
+        <ColumnName>Тип</ColumnName>
+        <ColumnWidth>30</ColumnWidth>
+        <KeyData>secondCriterion</KeyData>
+        <Summable>false</Summable>
+    </Column>
+    <Column>
+        <ColumnName>Кол-во (GL)</ColumnName>
+        <ColumnWidth>20</ColumnWidth>
+        <KeyData>leftCount</KeyData>
+        <Summable>true</Summable>
+    </Column>
+    <Column>
+        <ColumnName>Оборот (GL)</ColumnName>
+        <ColumnWidth>70</ColumnWidth>
+        <KeyData>leftAmount</KeyData>
+        <Summable>true</Summable>
+    </Column>
+    <Column>
+        <ColumnName>Кол-во (3.5.9)</ColumnName>
+        <ColumnWidth>20</ColumnWidth>
+        <KeyData>rightCount</KeyData>
+        <Summable>true</Summable>
+    </Column>
+    <Column>
+        <ColumnName>Оборот (3.5.9)</ColumnName>
+        <ColumnWidth>70</ColumnWidth>
+        <KeyData>rightAmount</KeyData>
+        <Summable>true</Summable>
+    </Column>
+    <Column>
+        <ColumnName>Дельта (кол-во)</ColumnName>
+        <ColumnWidth>20</ColumnWidth>
+        <KeyData>notEqualsCount</KeyData>
+        <Summable>true</Summable>
+    </Column>
+    <Column>
+        <ColumnName>Дельта (оборот)</ColumnName>
+        <ColumnWidth>70</ColumnWidth>
+        <KeyData>deltaAmount</KeyData>
+        <Summable>true</Summable>
+    </Column>
+</LegendTableModel>

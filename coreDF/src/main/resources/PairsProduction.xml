@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- The list of available systems -->
+<CompareSystem>
+    <OnePair>
+        <GeneralSystem>GL</GeneralSystem>
+        <MasterSystem>D359</MasterSystem>
+        <TypeReconciliation>AccountBalance</TypeReconciliation>
+        <GeneralSQL>QAllRest_361_3591.sql</GeneralSQL>
+        <MasterSQL>QAllRest_3591.sql</MasterSQL>
+        <LegendName>REST.xml</LegendName>
+        <SummaryLegendName>SUMMARY_REST.xml</SummaryLegendName>
+    </OnePair>
+    <OnePair>
+        <GeneralSystem>GL</GeneralSystem>
+        <MasterSystem>D359</MasterSystem>
+        <TypeReconciliation>Turns</TypeReconciliation>
+        <GeneralSQL>QTurn_361_3591.sql</GeneralSQL>
+        <MasterSQL>QTurn_3591.sql</MasterSQL>
+        <LegendName>TURN.xml</LegendName>
+        <SummaryLegendName>SUMMARY_TURN.xml</SummaryLegendName>
+        <ClassicLegendName>TURN_CLASSIC.xml</ClassicLegendName>
+    </OnePair>
+    <OnePair>
+        <GeneralSystem>GL</GeneralSystem>
+        <MasterSystem>D359</MasterSystem>
+        <TypeReconciliation>Documents</TypeReconciliation>
+        <GeneralSQL>QDocs_361_3591.sql</GeneralSQL>
+        <MasterSQL>QDocs_3591.sql</MasterSQL>
+        <LegendName>DOCS.xml</LegendName>
+        <SummaryLegendName>SUMMARY_DOCS.xml</SummaryLegendName>
+    </OnePair>
+    <OnePair>
+        <GeneralSystem>GL</GeneralSystem>
+        <MasterSystem>PE</MasterSystem>
+        <TypeReconciliation>Documents</TypeReconciliation>
+        <GeneralSQL>QDocs_361_PE.sql</GeneralSQL>
+        <MasterSQL>QDocs_PE.sql</MasterSQL>
+        <LegendName>DOCS_PE.xml</LegendName>
+        <SummaryLegendName>SUMMARY_DOCS_PE.xml</SummaryLegendName>
+        <HiddenParams>typeDoc</HiddenParams>
+    </OnePair>
+</CompareSystem>
