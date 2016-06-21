@@ -15,7 +15,6 @@
 bin/**
 tmp/**
 tmp/**/*
-*server*
 ConnectionsSetterInner.java
 *.tmp
 *.bak

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Connection properties.</comment>
+<entry key="SQLServer">Oracle Database</entry>
+<entry key="HostSQLServer">fesb3</entry>
+<entry key="SQLServerPort">3200</entry>
+<entry key="DataBaseName">FES</entry>
+<entry key="DataBaseProduct">PE</entry>
+<entry key="ProductVersion">R69</entry>
+<entry key="DataBaseUser"></entry>
+<entry key="DataBasePassword"></entry>
+<entry key="DataBaseEncryptPassword">Q+2akz1EIh/gySNBRRL5sA==</entry>
+</properties>
+

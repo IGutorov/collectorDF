@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Connection properties.</comment>
+<entry key="SQLServer">Oracle Database</entry>
+<entry key="HostSQLServer">//srvg013.ru</entry>
+<entry key="SQLServerPort">8000</entry>
+<entry key="DataBaseName">pgmr</entry>
+<entry key="DataBaseProduct">PGMR jerboa</entry>
+<entry key="ProductVersion">1.0</entry>
+<entry key="DataBaseUser">pgmr</entry>
+<entry key="DataBasePassword"></entry>
+<entry key="DataBaseEncryptPassword">kFxgVBki7nvNLDOrifdfnn8//AeVALum</entry>
+</properties>
+

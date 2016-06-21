@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Connection properties.</comment>
+<entry key="SQLServer">Adaptive Server Enterprise</entry>
+<entry key="HostSQLServer">srv54.ru</entry>
+<entry key="SQLServerPort">8000</entry>
+<entry key="DataBaseName">Test361_1</entry>
+<entry key="DataBaseProduct">5NT(e)</entry>
+<entry key="ProductVersion">3.6.1</entry>
+<entry key="DataBaseUser"></entry>
+<entry key="DataBasePassword"></entry>
+</properties>
