@@ -1,14 +1,8 @@
 package com.epam.rcrd.coreDF;
 
-import com.epam.common.igLib.ISaveTrace;
-import com.epam.common.igLib.MapTraces.IUpdateStack;
 import com.epam.rcrd.coreDF.IMergerStarter.TypeReconciliation;
 
 public interface IConnectionsCore {
-
-    ISaveTrace registerReDrawer(IUpdateStack reDrawer);
-
-    //    void setConnections(String aliasNameFirst, String aliasNameSecond) throws Exception;
 
     boolean checkBothConnections() throws Exception;
 

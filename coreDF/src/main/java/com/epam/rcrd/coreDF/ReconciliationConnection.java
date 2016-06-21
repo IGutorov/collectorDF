@@ -1,13 +1,11 @@
 package com.epam.rcrd.coreDF;
 
 import java.sql.Connection;
-// import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Date;
 import java.util.Properties;
 import com.epam.rcrd.coreDF.Merger.IRunQuery;
 
@@ -29,11 +27,12 @@ abstract class ReconciliationConnection implements IRunQuery {
         return isOpen;
     }
 
-    // ?? 4 trace
+    /*
     void execQuery(String query) throws SQLException {
         currentStatement = connection.createStatement();
         currentStatement.execute(query);
     }
+    */
 
     @Override
     public ResultSet getResultSet(String query) throws SQLException {
@@ -192,7 +191,8 @@ abstract class ReconciliationConnection implements IRunQuery {
                 throw new SQLException("Не удалось подключиться к БД:" + aliasProp.getProperty("DataBaseName")
                         + " на сервере = " + aliasProp.getProperty("HostSQLServer"), e);
             } finally {
-                tuneStatement.close();
+                if (tuneStatement != null)
+                    tuneStatement.close();
             }
         
     }
@@ -247,7 +247,7 @@ abstract class ReconciliationConnection implements IRunQuery {
         }
         return result;
     }
-
+/*
     Date getGLServerTime() throws SQLException {
         Date resultDate = new Date();
         ResultSet resultSet = null;
@@ -264,7 +264,7 @@ abstract class ReconciliationConnection implements IRunQuery {
         }
         return resultDate;
     }
-
+*/
     String getCurrentDB() {
         return SQLProperties.getProperty("CURRENTDB");
     }
@@ -272,11 +272,11 @@ abstract class ReconciliationConnection implements IRunQuery {
     String getCurrentServer() {
         return SQLProperties.getProperty("CURRENTSERVER");
     }
-
+/*
     String getCurrentSPID() {
         return SQLProperties.getProperty("CURRENTSPID");
     }
-
+*/
     String getConnectionOptions() throws SQLException {
 
         return SQLProperties.toString() + "; Server host <" + aliasProp.getProperty("HostSQLServer") + ">";

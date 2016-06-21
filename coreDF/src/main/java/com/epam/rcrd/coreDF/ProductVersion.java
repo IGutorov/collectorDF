@@ -4,19 +4,28 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import static com.epam.common.igLib.LibFilesNew.*;
+
+import org.apache.log4j.Logger;
+
+import static com.epam.common.igLib.LibFiles.*;
 import static com.epam.common.igLib.LibFormats.*;
+
+import com.epam.common.igLib.CustomLogger;
 import com.epam.rcrd.coreDF.ProductVersionList.UploadProductVersion;
 
 class ProductVersion {
 
-    private static boolean                     isInitialize;
+    private static final Logger logger = CustomLogger.getDefaultLogger();
+
+    private static final String PRODUCTION_RESOURCENAME = "Productions.xml";
 
     private static Map<String, ProductVersion> productList = new HashMap<String, ProductVersion>();
 
-    private final String                       systemName;
-    private final String                       shortName;
-    private final String                       identificationName;
+    private static boolean  isInitialize;
+
+    private final String    systemName;
+    private final String    shortName;
+    private final String    identificationName;
 
     private ProductVersion(String identificationName, String systemName, String shortName) {
         this.systemName = systemName;
@@ -31,16 +40,20 @@ class ProductVersion {
                 + identificationName + "]";
     }
 
-    private static final String PRODUCTION_RESOURCENAME = "Productions.xml";
-
-    static void init() throws Exception {
+    static void init() {
         if (isInitialize)
             return;
         productList = new HashMap<String, ProductVersion>();
-        ProductVersionList prods = (ProductVersionList) convertXMLToObject(getInnerResource(PRODUCTION_RESOURCENAME),
-                null, ProductVersionList.class);
-        for (UploadProductVersion curr : prods.getList())
-            new ProductVersion(curr.getIdentificationName(), curr.getSystemName(), curr.getShortName());
+        ProductVersionList prods;
+        try {
+            prods = (ProductVersionList) convertXMLToObject(getInnerResource(PRODUCTION_RESOURCENAME),
+                    null, ProductVersionList.class);
+            for (UploadProductVersion curr : prods.getList())
+                new ProductVersion(curr.getIdentificationName(), curr.getSystemName(), curr.getShortName());
+        } catch (Exception e) {
+            logger.error("Error upload ProductVersionList", e);
+            return;
+        }
         isInitialize = true;
     }
 

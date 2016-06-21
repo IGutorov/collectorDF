@@ -6,23 +6,29 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+
+import org.apache.log4j.Logger;
+
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import com.epam.common.igLib.ISaveTrace;
+import com.epam.common.igLib.CustomLogger;
 import com.epam.rcrd.coreDF.IConnectionsSetter;
 import com.epam.rcrd.coreDF.IConnectionsCore.NumberConnection;
+import com.epam.rcrd.swingDF.MainTabbedPane;
 
 final class JPanelConnect extends JPanel {
 
-    private static final long serialVersionUID = 1L;
+    private static final long   serialVersionUID        = 1L;
 
     private static final String ENCRYPTED_PASSWORD_VIEW = "**********";
     private static final char   PASSWORD_CHAR           = '*';
 
-    interface ICheckConnections {
-        void callBack() throws Exception;
+    private static final Logger logger                  = CustomLogger.getDefaultLogger();
+
+    interface IAfterCheckConnections {
+        void connectionsIsChecked() throws Exception;
     }
 
     private boolean              disabled    = false;
@@ -31,15 +37,15 @@ final class JPanelConnect extends JPanel {
     private final JButton        btnConnect1 = new JButton("Connect");
 
     // @SuppressWarnings("rawtypes") // annotation for Java 7+
-    private final JComboBox aliasName; // java 6 compatible
+    private final JComboBox      aliasName;                           // java 6 compatible
 
     // @SuppressWarnings("rawtypes") // annotation for Java 7+
     private JComboBox getJComboBox(String[] aliasList) {
         return new JComboBox(aliasList);
     }
 
-    JPanelConnect(final NumberConnection number, final IConnectionsSetter connectionsSetter, final ISaveTrace mainTrace,
-            final ICheckConnections checkConnections) {
+    JPanelConnect(final NumberConnection number, final IConnectionsSetter connectionsSetter,
+            final MainTabbedPane mainTabbedPane) {
 
         aliasName = getJComboBox(connectionsSetter.getAliasList());
         aliasName.setBackground(Color.WHITE);
@@ -68,7 +74,7 @@ final class JPanelConnect extends JPanel {
                     if (isEncryptedPassword)
                         password1.setText(ENCRYPTED_PASSWORD_VIEW);
                 } catch (Exception e) {
-                    mainTrace.saveException(e);
+                    logger.error("load alias-properties", e);
                 }
             }
         });
@@ -77,14 +83,14 @@ final class JPanelConnect extends JPanel {
             @Override
             public void actionPerformed(ActionEvent event) {
                 try {
-                    if (connectionsSetter.checkSetConnection(number, getCurrentSystem(), login1.getText(),
-                            new String(password1.getPassword()))) {
-                        mainTrace.saveMessage(connectionsSetter.getConnectionOptions(number));
+                    if (connectionsSetter.checkSetConnection(number, getCurrentSystem(), login1.getText(), new String(
+                            password1.getPassword()))) {
+                        logger.info(connectionsSetter.getConnectionOptions(number));
                         disableAll();
-                        checkConnections.callBack();
+                        AddComponent.connectionsIsChecked(mainTabbedPane, connectionsSetter);
                     }
                 } catch (Exception e) {
-                    mainTrace.saveException(e);
+                    logger.error("check connection", e);
                 }
             }
         });

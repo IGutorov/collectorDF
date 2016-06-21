@@ -2,8 +2,9 @@ package com.epam.rcrd.coreDF;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import static com.epam.common.igLib.LibFiles.*;
 
-public class ReconciliationConnectionImpl {
+class ReconciliationConnectionImpl {
 
     private static final String PRODUCT_DIASOFT = "5NT(e)";
 
@@ -18,7 +19,7 @@ public class ReconciliationConnectionImpl {
 
         @Override
         public String getKeyValue(ResultSet resultSet, String key) throws Exception {
-            return new String(resultSet.getBytes(key), "Cp1251");
+            return new String(resultSet.getBytes(key), WIN_CHARSET);
         }
 
         @Override

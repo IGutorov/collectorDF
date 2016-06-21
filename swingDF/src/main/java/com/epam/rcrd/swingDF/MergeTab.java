@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.awt.event.ActionEvent;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.Enumeration;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -22,13 +23,14 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.MaskFormatter;
 
-import com.epam.common.igLib.ISaveTrace;
+import org.apache.log4j.Logger;
 
-import static com.epam.common.igLib.LibFilesNew.*;
+import static com.epam.common.igLib.LibFiles.*;
 import static com.epam.common.igLib.LibFormats.*;
 
 import com.epam.rcrd.coreDF.IConnectionsSetter;
@@ -42,11 +44,11 @@ import static com.epam.rcrd.swingDF.AddComponent.*;
 
 abstract class MergeTab implements ICallBack {
 
-    private static final Font   FONT_MONO_SPACED  = new Font("Lucida Console", Font.PLAIN, 11);
-    private static final char   DEFAULT_HOLD_CHAR = '_';
-    private static final String DEFAULT_DATE_MASK = "##.##.####";
+    private static final Font                     FONT_MONO_SPACED         = new Font("Lucida Console", Font.PLAIN, 11);
+    private static final char                     DEFAULT_HOLD_CHAR        = '_';
+    private static final String                   DEFAULT_DATE_MASK        = "##.##.####";
 
-    private static final int MAX_COUNT_MERGE_INSTANCE = 100;
+    private static final int                      MAX_COUNT_MERGE_INSTANCE = 100;
 
     private static final DefaultTableCellRenderer rightRenderer;
 
@@ -55,22 +57,22 @@ abstract class MergeTab implements ICallBack {
         rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
     }
 
-    private final JButton     btnXls;
-    private final JButton     btnAdd           = new JButton("+");
-    private final JTabbedPane resultTabbedPane = new JTabbedPane(JTabbedPane.NORTH, JTabbedPane.WRAP_TAB_LAYOUT);
+    private final JButton                         btnXls;
+    private final JButton                         btnAdd                   = new JButton("+");
+    private final JTabbedPane                     resultTabbedPane         = new JTabbedPane(JTabbedPane.NORTH,
+                                                                                   JTabbedPane.WRAP_TAB_LAYOUT);
 
-    protected final ISaveTrace     saveTrace;
-    protected final IMergerStarter mergerStarter;
+    protected final Logger logger;
+    protected final IMergerStarter                mergerStarter;
 
     //  template method pattern
-    protected MergeTab(final JTabbedPane mainTabbedPane, final IConnectionsSetter connectionsSetter,
+    protected MergeTab(final MainTabbedPane mainTabbedPane, final IConnectionsSetter connectionsSetter,
             final TypeReconciliation mainType) throws Exception {
 
-        final JSplitPane tabbedPaneComponent = getNewSplitter();
         mergerStarter = connectionsSetter.getNewMerger(mainType);
-        saveTrace = mergerStarter.getNewTrace(tabbedPaneComponent);
-
-        final ProgressLabel progressLabel = new ProgressLabel();
+        logger = mergerStarter.getLogger();
+        
+        ProgressLabel progressLabel = new ProgressLabel();
         mergerStarter.registerProgressIndicator((IProgressIndicator) progressLabel);
         mergerStarter.registerCallBack(this);
         final JButton btnStart = new JButton("Start");
@@ -82,9 +84,11 @@ abstract class MergeTab implements ICallBack {
 
         String pageName = getPageName();
 
+        JSplitPane tabbedPaneComponent = getNewSplitter();
+        
         if (mainTabbedPane.getTabCount() > 3)
             pageName += " (" + mainTabbedPane.getTabCount() + ")";
-        mainTabbedPane.add(pageName, tabbedPaneComponent);
+        mainTabbedPane.add(pageName, tabbedPaneComponent, logger);
         tabbedPaneComponent.setTopComponent(jPanelParams);
         tabbedPaneComponent.setBottomComponent(resultTabbedPane);
 
@@ -107,13 +111,12 @@ abstract class MergeTab implements ICallBack {
             public void actionPerformed(ActionEvent event) {
                 if (mainTabbedPane.getTabCount() < MAX_COUNT_MERGE_INSTANCE) {
                     try {
-                        addNewMergeTab(mainTabbedPane, connectionsSetter, mainType);
+                        addOneMergeTab(mainTabbedPane, connectionsSetter, mainType);
                     } catch (Exception e) {
-                        saveTrace.saveException(e);
+                        logger.error("add tab failed ", e);
                     }
                     mainTabbedPane.setSelectedIndex(mainTabbedPane.getTabCount() - 1);
                 }
-
             }
         });
 
@@ -131,7 +134,6 @@ abstract class MergeTab implements ICallBack {
                 if (mergerStarter.isParamsChecked()) {
                     ((JButton) event.getSource()).setEnabled(false);
                     disableParams();
-                    // Start reconciliation
                     mergerStarter.mergeGo();
                 }
             }
@@ -146,21 +148,21 @@ abstract class MergeTab implements ICallBack {
 
     private void addSubTabbedPage(final String tabbedPageName, final TableDesign tableDesign) {
         if (tableDesign == null) {
-            saveTrace.saveMessage("tableDesign == null");
+            logger.error("tableDesign == null");
             return;
         }
         AbstractTableModel tableModel = mergerStarter.getTableModel(tableDesign);
         if (tableModel == null) {
-            saveTrace.saveMessage("tableModel == null");
+            logger.error("tableModel == null");
             return;
         }
-        final JTable jTable = new JTable(tableModel);
-        final TableRowSorter<AbstractTableModel> rowSorter = new TableRowSorter<AbstractTableModel>(tableModel);
+        JTable jTable = new JTable(tableModel);
+        TableRowSorter<AbstractTableModel> rowSorter = new TableRowSorter<AbstractTableModel>(tableModel);
         jTable.setRowSorter(rowSorter);
         jTable.setAutoCreateColumnsFromModel(true);
         setColumnSizes(jTable.getColumnModel(), mergerStarter.getColumnSizes(tableDesign));
 
-        final JSplitPane jSplitPane = getNewSplitter();
+        JSplitPane jSplitPane = getNewSplitter();
         jSplitPane.setTopComponent(jTable.getTableHeader());
         jSplitPane.setBottomComponent(new JScrollPane(jTable));
         resultTabbedPane.add(tabbedPageName, jSplitPane);
@@ -171,9 +173,10 @@ abstract class MergeTab implements ICallBack {
     }
 
     private void cellCentre(final TableColumnModel tableColumnModel) {
-        int columnCount = tableColumnModel.getColumnCount();
-        for (int i = 1; i < columnCount; i++)
-            tableColumnModel.getColumn(i).setCellRenderer(rightRenderer);
+        Enumeration<TableColumn> tableColumns = tableColumnModel.getColumns();
+        while (tableColumns.hasMoreElements()) {
+            tableColumns.nextElement().setCellRenderer(rightRenderer);
+        }
     }
 
     private void setColumnSizes(final TableColumnModel tableColumnModel, final Integer[] columnSizes) {
@@ -186,14 +189,14 @@ abstract class MergeTab implements ICallBack {
                 tableColumnModel.getColumn(i).setPreferredWidth(columnSizes[i]);
     }
 
-    private JButton getImageButton(final String imageFileName, final String caption) {
+    private JButton getImageButton(String imageFileName, String caption) {
         Icon icon = null;
         try {
             Image image = loadIcon(imageFileName);
             if (image != null)
                 icon = new ImageIcon(image);
         } catch (IOException e) {
-            saveTrace.saveException(e);
+            logger.warn("Error load ImageButton. " + imageFileName, e);
         }
         if (icon != null)
             return new JButton(icon);
@@ -218,7 +221,11 @@ abstract class MergeTab implements ICallBack {
     }
 
     protected void setCalcDateParam(final String strDate) {
-        mergerStarter.setParam("calcDate", strDate); // as is (dd.MM.yyyy)        
+        try {
+            mergerStarter.setParam("calcDate", strDate); // as is (dd.MM.yyyy)
+        } catch (Exception e) {
+            logger.error("setCalcDate failed", e);
+        }        
     }
 
     protected Date getDateFormatTextField(final JFormattedTextField in) {
@@ -228,9 +235,9 @@ abstract class MergeTab implements ICallBack {
             try {
                 result = getDate104(strDate);
             } catch (ParseException e) {
-                saveTrace.saveMessage("Incorrect Date " + strDate + ">.");
+                logger.error("Incorrect date format (DD.MM.YYYY). Value = " + strDate, e);
             }
-            saveTrace.saveMessage(" TDate <" + strDate + ">.");
+            logger.info("TDate <" + strDate + ">.");
         }
         return result;
     }

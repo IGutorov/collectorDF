@@ -93,7 +93,7 @@ select convert(varbinary(80), ib.paymentID) as EXTERNALID,
        '*Внутрен'        as FOBRIEF
   from ep_Hist_IB_RequestCreateDoc  ib  (index ind_plannedDate)
  where ib.plannedDate = @Date
-   and ib.RetCode = 802120 -- SKIP
+   and ib.RetCode = 802120 -- SKIP -- только до 18.10.2015
    and ib.DealTransactID = 0
  order by 1, 2
 at isolation 0

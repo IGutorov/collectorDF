@@ -1,18 +1,21 @@
 package com.epam.common.igLib;
 
-import static com.epam.common.igLib.LibFilesNew.*;
+import static com.epam.common.igLib.LibFiles.*;
+import static com.epam.common.igLib.LibFormats.*;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+
 class PackagePropertiesImpl {
 
+    private static final Logger logger = CustomLogger.getDefaultLogger();
+    
     // static map
     private static Map<String, PackagePropertiesInner> propsMap = new HashMap<String, PackagePropertiesInner>();
-
-    private static final String EMPTY_STRING = "";
 
     private static class PackagePropertiesInner {
 
@@ -27,9 +30,13 @@ class PackagePropertiesImpl {
             if (param == null)
                 return EMPTY_STRING;
 
-            if (properties == null)
-                uploadProperties();
-
+            if (properties == null) {
+                try {
+                    properties = getResourceProperties(path);
+                } catch (IOException e) {
+                    logger.error("Not readed file. Path = " + path, e);
+                }
+            }
             if (properties == null)
                 properties = new Properties();
 
@@ -66,16 +73,6 @@ class PackagePropertiesImpl {
         public String toString() {
             return "PackagePropertiesInner [path=" + path + ", properties=" + properties + "]";
         }
-
-        private void uploadProperties() {
-            try {
-                properties = getResourceProperties(path);
-            } catch (IOException e) {
-                System.out.println("e path = " + path);
-                e.printStackTrace();
-                // logger.profile ??
-            }
-        }
     }
 
     protected PackagePropertiesImpl() throws Exception {
@@ -84,7 +81,7 @@ class PackagePropertiesImpl {
 
     protected static String getProperty(String path, String param) {
         if (path == null) {
-            // logger.info ??
+            logger.warn("Error. path = null");
             return EMPTY_STRING;
         }
         PackagePropertiesInner curr = propsMap.get(path);

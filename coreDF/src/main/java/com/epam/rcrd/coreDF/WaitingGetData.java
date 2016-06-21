@@ -1,10 +1,15 @@
 package com.epam.rcrd.coreDF;
 
+import org.apache.log4j.Logger;
+
+import com.epam.common.igLib.CustomLogger;
 import com.epam.rcrd.coreDF.IConnectionsCore.IProgressIndicator;
 
 final class WaitingGetData extends Thread {
 
-    private boolean                  processFinished;
+    private static final Logger logger = CustomLogger.getDefaultLogger();
+    
+    private volatile boolean         processFinished;
     private final IProgressIndicator indicator;
 
     void terminate() {
@@ -24,9 +29,8 @@ final class WaitingGetData extends Thread {
                 try {
                     sleep(150);
                 } catch (InterruptedException e) {
-                    // e.printStackTrace("Ошибка мониторинга получения данных.");
+                    logger.error("Error waiting monitor", e);
                 }
-
             }
         } finally {
             indicator.FinishProcess();
@@ -38,11 +42,16 @@ final class WaitingGetData extends Thread {
             progressIndicator = new IProgressIndicator() {
                 // default methods allow Java 8
                 @Override
-                public void StartProcess() {}
+                public void StartProcess() {
+                }
+
                 @Override
-                public void NextStep() {}
+                public void NextStep() {
+                }
+
                 @Override
-                public void FinishProcess() {}
+                public void FinishProcess() {
+                }
             };
         }
         indicator = progressIndicator;

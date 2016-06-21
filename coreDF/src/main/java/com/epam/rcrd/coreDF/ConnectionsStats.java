@@ -68,7 +68,7 @@ final class ConnectionsStats {
         }
     }
 
-    ConnectionsStats() throws Exception {
+    ConnectionsStats() {
         applicationName = PackageProperties.getProperty("Application.SQLname");
         ProductVersion.init();
         CompareSystem.init();

@@ -5,9 +5,9 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JTabbedPane;
 
 import static com.epam.common.igLib.LibFormats.*;
+
 import com.epam.rcrd.coreDF.IConnectionsSetter;
 import com.epam.rcrd.coreDF.IMergerStarter.TypeReconciliation;
 
@@ -19,7 +19,7 @@ final class MergeTabSaldo extends MergeTab {
     private JRadioButton        rbBalanceSaldo;
     private JRadioButton        rbVnebalnceSaldo;
 
-    MergeTabSaldo(final JTabbedPane mainTabbedPane, final IConnectionsSetter connectionsSetter) throws Exception {
+    MergeTabSaldo(final MainTabbedPane mainTabbedPane, final IConnectionsSetter connectionsSetter) throws Exception {
         super(mainTabbedPane, connectionsSetter, TypeReconciliation.AccountBalance);
     }
 
@@ -33,7 +33,7 @@ final class MergeTabSaldo extends MergeTab {
         try {
             calcDateSaldo = getJFormDateField(getStrDate104(getToday()));
         } catch (Exception e) {
-            saveTrace.saveException(e);
+            logger.error("format failed", e);
         }
         rbBalanceSaldo = new JRadioButton("Баланс(А)");
         rbVnebalnceSaldo = new JRadioButton("Внебаланс(В)");
@@ -51,7 +51,11 @@ final class MergeTabSaldo extends MergeTab {
 
     @Override
     protected void setParams() {
-        mergerStarter.setParam("balanceA", "" + rbBalanceSaldo.isSelected());
+        try {
+            mergerStarter.setParam("balanceA", "" + rbBalanceSaldo.isSelected());
+        } catch (Exception e) {
+            logger.error("setParams failed", e);
+        }
         setCalcDateParam("" + calcDateSaldo.getValue());
     }
 

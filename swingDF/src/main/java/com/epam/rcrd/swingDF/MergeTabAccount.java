@@ -3,9 +3,9 @@ package com.epam.rcrd.swingDF;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 
 import static com.epam.common.igLib.LibFormats.*;
+
 import com.epam.rcrd.coreDF.IConnectionsSetter;
 import com.epam.rcrd.coreDF.IMergerStarter.TypeReconciliation;
 
@@ -19,7 +19,7 @@ final class MergeTabAccount extends MergeTab {
     private JFormattedTextField calcBeginDateAccount;
     private JFormattedTextField calcEndDateAccount;
 
-    MergeTabAccount(final JTabbedPane mainTabbedPane, final IConnectionsSetter connectionsSetter) throws Exception {
+    MergeTabAccount(final MainTabbedPane mainTabbedPane, final IConnectionsSetter connectionsSetter) throws Exception {
         super(mainTabbedPane, connectionsSetter, TypeReconciliation.AccountStatement);
     }
 
@@ -36,7 +36,7 @@ final class MergeTabAccount extends MergeTab {
             calcBeginDateAccount = getJFormDateField(getStrDate104(getFirstDatePreviousYear())); // начало прошлого года
             calcEndDateAccount = getJFormDateField(getStrDate104(getYesterdayDate())); // вчера
         } catch (Exception e) {
-            saveTrace.saveException(e);
+            logger.error("default params failed", e);
         }
 
         jPanelParams.add(new JLabel("Обороты по счёту "));
@@ -59,9 +59,13 @@ final class MergeTabAccount extends MergeTab {
 
     @Override
     protected void setParams() {
-        mergerStarter.setParam("startDatePeriod", (String) calcBeginDateAccount.getValue()); // as is (dd.MM.yyyy)
-        mergerStarter.setParam("endDatePeriod", (String) calcEndDateAccount.getValue()); // as is (dd.MM.yyyy)
-        mergerStarter.setParam("account", getBriefAccount());
+        try {
+            mergerStarter.setParam("startDatePeriod", (String) calcBeginDateAccount.getValue());
+            mergerStarter.setParam("endDatePeriod", (String) calcEndDateAccount.getValue()); // as is (dd.MM.yyyy)
+            mergerStarter.setParam("account", getBriefAccount()); // as is (dd.MM.yyyy)
+        } catch (Exception e) {
+            logger.error("setParams failed", e);
+        }
     }
 
     @Override

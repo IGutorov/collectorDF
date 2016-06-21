@@ -1,12 +1,15 @@
 package com.epam.rcrd.coreDF;
 
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 
+import org.apache.log4j.Logger;
+
 import static com.epam.rcrd.coreDF.PackageConsts.*;
-import com.epam.common.igLib.ISaveTrace;
 import static com.epam.common.igLib.LibFormats.*;
+
 import com.epam.common.igLib.TimeProfiler;
 import com.epam.rcrd.coreDF.IConnectionsCore.ICallBack;
 import com.epam.rcrd.coreDF.IConnectionsCore.IProgressIndicator;
@@ -17,101 +20,95 @@ final class Merger extends Thread {
     private ReconciliationConnection GLConnection;
     private ReconciliationConnection masterConnection;
 
-    private ComparedResultSet leftCompared;
-    private ComparedResultSet rightCompared;
+    private ComparedResultSet        leftCompared;
+    private ComparedResultSet        rightCompared;
 
-    private MergeResults mergeResults;
+    private MergeResults             mergeResults;
 
-    private final MergeParams      mergeParams;
-    private final ISaveTrace       saveTrace;
-    private final WaitingGetData   waitData;
-    private final ICallBack        callBack;
-    private final ConnectionsStats connectionGetter;
-    private final boolean          resultSave;
-    private final boolean          logSave;
+    private final MergeParams        mergeParams;
+    private final Logger             logger;
+    private final WaitingGetData     waitData;
+    private final ICallBack          callBack;
+    private final ConnectionsStats   connectionGetter;
+    private final boolean            resultSave;
+    private final boolean            logSave;
 
     // ?? summary result sign (move to mergeParams ??)
     // int                      diffCount                  = 0; // количество расхождений (0 - Ок)
     // boolean                  procressIsFailed           = false; // Сверка прервана
 
-    private LoopCounter loopCounter;
+    private LoopCounter              loopCounter;
 
     interface IRunQuery {
         ResultSet getResultSet(String query) throws SQLException;
-        
+
         void closeStatement() throws SQLException;
 
         void closeConnection() throws SQLException;
-        
+
         String getKeyValue(ResultSet resultSet, String key) throws Exception;
 
         String getInterfaceProductName();
     }
 
     private ComparedResultSet getComparedResultSet(final IRunQuery connection, final ConnectionSide comparedSide) {
-        return ComparedResultSetImpl.getComparedResultSet(connection, comparedSide, mergeParams, saveTrace);
+        return ComparedResultSetImpl.getComparedResultSet(connection, comparedSide, mergeParams, logger);
     }
 
     private void runInner() {
+
+        ResultSaveFile resFile = new ResultSaveFile(mergeParams.getType().getPrefixFileName(), getBeginFolderName());
+        try {
+            if (logSave)
+                resFile.addFileAppender(logger);
+        } catch (IOException e1) {
+            logger.error("Error add fileAppender", e1);
+        }
 
         leftCompared = getComparedResultSet((IRunQuery) GLConnection, ConnectionSide.LEFT);
         rightCompared = getComparedResultSet((IRunQuery) masterConnection, ConnectionSide.RIGHT);
         final String mainHeader = mergeParams.getMainHeader(GLConnection.getInterfaceProductName(),
                 masterConnection.getInterfaceProductName());
 
-        saveTrace.saveMessage(mainHeader);
+        logger.info(mainHeader);
 
         mergeResults = MergeResultsImpl.getMergeResults(mergeParams.getPairType(),
                 (TableModelMerger) mergeParams.getTableModel(TableDesign.DataTable), leftCompared, rightCompared,
                 mainHeader);
 
-        ResultSaveFile resFile = null;
-
-        if (resultSave || logSave) {
-            resFile = new ResultSaveFile(mergeParams.getType().getPrefixFileName(), getBeginFolderName(),
-                    getUniqueTailFileName());
-        }
-
-        saveTrace.saveMessage("GL SPID: " + GLConnection.getCurrentSPID());
-        saveTrace.saveMessage("Master SPID: " + masterConnection.getCurrentSPID());
-        saveTrace.saveMessage("!! Process started: " + getStrDate108(new Date()));
+        // ?? //  logger.info("GL SPID: " + GLConnection.getCurrentSPID());
+        // ?? //  logger.info("Master SPID: " + masterConnection.getCurrentSPID());
+        logger.info("!! Process started: " + getStrDate108(new Date()));
 
         TimeProfiler timeProfiler = new TimeProfiler();
 
         try {
             waitData.start();
-
             try {
                 executeMerge();
             } catch (Exception e) {
                 mergeParams.setCompleted(false, e.getMessage()); // ??
-                saveTrace.saveException(e);
+                logger.error("Reconsilation process terminated.", e);
             } finally {
                 leftCompared.closeResultSet();
                 rightCompared.closeResultSet();
             }
 
-            saveTrace.saveMessage("Общее время выполнения(сек): " + timeProfiler.getTimeAndNextLap() / 1000);
+            logger.info("Общее время выполнения(сек): " + timeProfiler.getTimeAndNextLap() / 1000);
 
             mergeParams.uploadDataToModel(mergeResults);
 
-            saveTrace.saveMessage("Формирование результата (сек): " + (timeProfiler.getTimeAndNextLap() / 100) / 10.);
+            logger.info("Формирование результата (сек): " + (timeProfiler.getTimeAndNextLap() / 100) / 10.);
 
-            if (resFile != null)
-                if (resultSave || logSave) {
-                    try {
-                        resFile.createFolder();
-                        if (logSave)
-                            resFile.saveLog(saveTrace.getTrace());
-                        if (resultSave) {
-                            resFile.saveResult(mergeResults.getResultHTML());
-                            mergeParams.setAbsoluteFileName(resFile.getResultFileName());
-                        }
-                    } catch (Exception e) {
-                        saveTrace.saveException(e);
-                    }
+            if (resultSave) {
+                try {
+                    String resFileName = resFile.saveResult(mergeResults.getResultHTML());
+                    mergeParams.setAbsoluteFileName(resFileName);
+                } catch (Exception e) {
+                    logger.error("Error save result", e);
                 }
-            saveTrace.saveMessage("Сохранение результата (мсек): " + timeProfiler.getTimeAndNextLap());
+            }
+            logger.info("Сохранение результата (мсек): " + timeProfiler.getTimeAndNextLap());
 
         } finally {
             waitData.terminate();
@@ -130,11 +127,9 @@ final class Merger extends Thread {
         try {
             GLConnection = connectionGetter.getNewGeneralConnection();
             masterConnection = connectionGetter.getNewMasterConnection();
-            
             runInner();
-
         } catch (Exception e1) {
-            saveTrace.saveException(e1);
+            logger.error("Error get connection", e1);
         } finally {
             try {
                 if (GLConnection != null)
@@ -142,24 +137,23 @@ final class Merger extends Thread {
                 if (masterConnection != null)
                     masterConnection.closeConnection();
             } catch (SQLException e) {
-                saveTrace.saveException(e);
+                logger.error("Error close connection", e);
             }
         }
 
     }
 
-    Merger(final MergeParams mergeParams, final ConnectionsStats connectionGetter,
-            final IProgressIndicator progressIndicator, final ISaveTrace saveTrace, final ICallBack callBack)
-                    throws Exception {
-
+    Merger(MergeParams mergeParams, ConnectionsStats connectionGetter, IProgressIndicator progressIndicator,
+            Logger logger, ICallBack callBack) {
+        super("Merger");
         this.mergeParams = mergeParams;
-        this.saveTrace = saveTrace;
+        this.logger = logger;
         this.callBack = callBack;
         this.waitData = new WaitingGetData(progressIndicator);
         this.connectionGetter = connectionGetter;
 
-        resultSave = !PackageProperties.getProperty("FileResults.SkipSave").equalsIgnoreCase("true");
-        logSave = !PackageProperties.getProperty("FileLog.SkipSave").equalsIgnoreCase("true");
+        resultSave = !PackageProperties.getProperty("FileResults.skipSave").equalsIgnoreCase("true");
+        logSave = !PackageProperties.getProperty("FileLog.skipSave").equalsIgnoreCase("true");
     }
 
     private void saveNewError(final int diffType, final ComparedResultSet currentCompared) throws Exception {
@@ -213,14 +207,17 @@ final class Merger extends Thread {
 
         execMainSQLQueries();
 
-        final TimeProfiler timeProfiler = new TimeProfiler();
+        TimeProfiler timeProfiler = new TimeProfiler();
 
         fetchNext(FetchSide.BOTH);
 
         if (!leftCompared.isFetched && !rightCompared.isFetched) {
             mergeParams.setNonCriticalMessage(); // Terminate with warning.
+            logger.info("No data for date");
             throw new Exception("Ошибка выбора параметров. В системах нет данных за выбранную дату.");
         }
+
+        // ?? + first error ??
         if (!leftCompared.isFetched) {
             throw new Exception("Error. No data GL (left).");
         }
@@ -251,21 +248,10 @@ final class Merger extends Thread {
             loopCounter.next();
         }
 
-        saveTrace.saveMessage(
-                "Сверка результатов выполнена за: " + (timeProfiler.getTimeInterval() / 100) / 10.0 + " сек.");
+        logger.info("Сверка результатов выполнена за: " + (timeProfiler.getTimeInterval() / 100) / 10.0 + " сек.");
     }
 
     private String getBeginFolderName() {
         return getStrDate112(mergeParams.getMainDate()) + "_" + masterConnection.getCurrentDB();
-    }
-
-    private String getUniqueTailFileName() {
-        String result = "";
-        try {
-            result = getStrDate108c(GLConnection.getGLServerTime()) + GLConnection.getCurrentSPID();
-        } catch (SQLException e) {
-            saveTrace.saveException(e);
-        }
-        return result;
     }
 }

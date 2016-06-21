@@ -1,171 +1,104 @@
 package com.epam.common.igLib;
 
 import java.awt.Image;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.URL;
+import java.security.CodeSource;
+import java.security.ProtectionDomain;
 import java.util.Arrays;
-import java.util.Scanner;
+import java.util.Properties;
 
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
+
+import org.apache.log4j.Logger;
+
+import static com.epam.common.igLib.LibFormats.*;
 
 public final class LibFiles {
 
+    private static final Logger logger                      = CustomLogger.getDefaultLogger();
+
+    public static final String  UTF_CHARSET                 = "UTF-8";
+    public static final String  WIN_CHARSET                 = "Cp1251";
+    public static final String  IBM_CHARSET                 = "Cp866";
+    private static final String DEFAULT_CHARSET             = UTF_CHARSET;
+
+    public static final String  LINE_SEPARATOR              = System.getProperty("line.separator");
+
+    private static final String packageAbsolutePath;                                               // constant defined runtime
+
+    private static final String DEFAULT_RESOURCE_DIRIECTORY = "resources";
+
     private LibFiles() {
     }
-/*
-    public static final String WIN_CHARSET = "Cp1251";
 
-    private static final String   DEFAULT_CHARSET = WIN_CHARSET; // "Cp866" // "UTF-8"
-    private static final int      SIZE_BLOCK_READ = 10000;
-    private static final String[] SPACE_LIST      = { "" };
-
-    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+    private static final int SIZE_BLOCK_READ = 8192;
 
     // Поблочное чтение файла InputStreamReader.read(char cbuf[], int offset, int length)
     // Reads characters into a portion of an array.
-    private static String readInputStream(final InputStreamReader inputStream) throws IOException {
+    private static String readInputStream(BufferedReader inputStreamReader) throws IOException {
         int readedSize = 0;
         char[] charBuffer = new char[SIZE_BLOCK_READ];
         StringBuilder sb = new StringBuilder(SIZE_BLOCK_READ);
         do {
-            readedSize = inputStream.read(charBuffer, 0, SIZE_BLOCK_READ);
+            readedSize = inputStreamReader.read(charBuffer, 0, SIZE_BLOCK_READ);
             if (readedSize > 0)
                 sb.append(charBuffer, 0, readedSize);
         } while (readedSize == SIZE_BLOCK_READ);
+        inputStreamReader.close();
         return sb.toString();
     }
 
-    public static String getStringFromFile(final String fileName, final String charsetName)
-            throws UnsupportedEncodingException, FileNotFoundException, IOException {
-        return getStringFromFile(new File(fileName), charsetName);
+    public static String getResourceAsString(InputStream inputStream) throws IOException {
+        return getResourceAsString(inputStream, null);
     }
 
-    public static String getStringFromFile(final String fileName)
-            throws UnsupportedEncodingException, FileNotFoundException, IOException {
-        return getStringFromFile(new File(fileName), null);
-    }
-
-    public static String getStringFromFile(final File file)
-            throws UnsupportedEncodingException, FileNotFoundException, IOException {
-        return getStringFromFile(file, null);
-    }
-
-    public static String getStringFromFile(final File file, String charsetName)
-            throws UnsupportedEncodingException, FileNotFoundException, IOException {
+    public static String getResourceAsString(InputStream inputStream, String charsetName) throws IOException {
         if (charsetName == null || charsetName.isEmpty())
             charsetName = DEFAULT_CHARSET;
 
-        InputStreamReader inputStream = null;
+        BufferedReader bufferedReader = null;
         try {
-            inputStream = new InputStreamReader(new FileInputStream(file), charsetName);
-            return readInputStream(inputStream);
+            bufferedReader = new BufferedReader(new InputStreamReader(inputStream, charsetName), SIZE_BLOCK_READ);
+            return readInputStream(bufferedReader);
         } finally {
-            if (inputStream != null)
-                inputStream.close();
+            if (bufferedReader != null)
+                bufferedReader.close();
         }
     }
 
-    public static String getStringFromFileL(final File file) throws IOException {
-        return getStringFromFileL(file, DEFAULT_CHARSET);
+    public static InputStream getInputStreamByName(String resourceName, Class<?> className) throws IOException {
+        InputStream result = className.getClassLoader().getResourceAsStream(resourceName);
+        if (result == null)
+            throw new FileNotFoundException("Resource not found: " + resourceName);
+        return result;
     }
 
-    public static String getStringFromFileL(final String fileName) throws IOException {
-        return getStringFromFileL(new File(fileName));
+    public static InputStream getInputStreamByName(String resourceName) throws IOException {
+        return getInputStreamByName(resourceName, LibFiles.class);
     }
 
-    // Построчное чтение файла Scanner.nextLine()
-    // (с автозаменой любых line.separator на локальный)
-    public static String getStringFromFileL(final File file, String charsetName) throws IOException {
-
-        if (charsetName == null || charsetName.isEmpty())
-            charsetName = DEFAULT_CHARSET;
-
-        if (!file.canRead())
-            throw new IOException("Не удалось открыть файл: " + file.getAbsolutePath());
-
-        Scanner in = null;
-        StringBuilder resultBuffer = new StringBuilder();
-
-        try {
-            in = new Scanner(file, charsetName);
-            while (in.hasNext())
-                resultBuffer.append(in.nextLine()).append(LINE_SEPARATOR);
-        } catch (Exception e) {
-            throw new IOException("Не удалось прочитать файл: " + file.getAbsolutePath(), e);
-        } finally {
-            if (in != null)
-                in.close();
-        }
-        return resultBuffer.toString();
+    public static InputStream getInnerResource(String resourceName) throws IOException {
+        return getInputStreamByName(resourceName);
     }
 
-    public static Image loadIcon(final File file) throws IOException {
-        return (Image) ImageIO.read(file);
-    }
-
-    public static Image loadIcon(final String fileName) throws IOException {
-        return loadIcon(new File(fileName));
-    }
-
-    public static Image loadResourceIcon(final String fileName) throws IOException {
-        return loadIcon("resources" + File.separator + fileName);
-    }
-
-    public static ImageIcon getImageIcon(final String imageFileName) throws IOException {
-        Image image = loadResourceIcon(imageFileName);
-        if (image != null)
-            return new ImageIcon(image);
-        else
-            return null;
-    }
-
-    public static void saveText2File(final String fileName, final String text) throws IOException {
-        saveText2File(fileName, text, DEFAULT_CHARSET);
-    }
-
-    public static void saveText2File(final String fileName, final String text, final String charset) throws IOException {
-        File file = new File(fileName);
-
-        if (file.exists())
-            if (!file.delete())
-                throw new IOException("remove file is not complete");
-
-        // если текста нет, то нового файла не создаём, только удаляем файл
-        if (text == null || text.isEmpty())
-            return;
-
-        OutputStreamWriter osw = null;
-        Writer out = null;
-
-        try {
-            if (charset == null)
-                osw = new OutputStreamWriter(new FileOutputStream(file)); // default ? (1251)
-            else
-                osw = new OutputStreamWriter(new FileOutputStream(file), charset);
-
-            out = new BufferedWriter(osw);
-            out.write(text);
-        } finally {
-            if (out != null)
-                out.close();
-            if (osw != null)
-                osw.close();
-        }
-    }
-
-    public static String getCurrentFolder() {
-        final File getFilePath = new File("getFilePath.txt");
-        final String strFileWithPath = getFilePath.getAbsolutePath();
-        return strFileWithPath.substring(0, strFileWithPath.length() - getFilePath.getName().length() - 1);
+    public static InputStream getOuterResource(String fileName) throws IOException {
+        String outerFileName = getFullFileName(fileName);
+        File file = new File(outerFileName);
+        if (!file.exists())
+            throw new FileNotFoundException("File <" + outerFileName + "> not found.");
+        return new FileInputStream(file);
     }
 
     public static String getExtensionFile(final String fileNameWithExt) {
@@ -176,21 +109,139 @@ public final class LibFiles {
         return (new StringBuilder(reverseStr.substring(0, lenExtension))).reverse().toString();
     }
 
-    public static String[] getFileListByExt(final String folderName, final String fileExtFilter) {
-        final File[] fileList = (new File(folderName)).listFiles();
+    public static String[] getStringsFromResource(String resourceName, String subFolder) throws IOException {
+        InputStream inputStream = getInnerResource(subFolder + "/" + resourceName);
+        String result = getResourceAsString(inputStream);
+        return result.split(LINE_SEPARATOR);
+    }
+
+    public static String[] getOuterResourcesListByExt(String subFolder, String fileExtFilter) {
+
+        String outerFileName = getFullFileName(subFolder);
+        File dir = new File(outerFileName);
+        File[] fileList = dir.listFiles();
         if (fileList == null || fileList.length == 0)
-            return SPACE_LIST.clone();
+            return EMPTY_STRING_ARRAY;
+        if (fileExtFilter == null || fileExtFilter.isEmpty())
+            return EMPTY_STRING_ARRAY;
 
-        String[] strFileList = new String[fileList.length];
-
+        String[] strFileList = new String[fileList.length + 1];
         strFileList[0] = "";
         int countList = 1;
+        int lenExt = fileExtFilter.length() + 1;
         for (File currFile : fileList) {
             String currFileName = currFile.getName();
             if (getExtensionFile(currFileName).equalsIgnoreCase(fileExtFilter))
-                strFileList[countList++] = currFileName.substring(0, currFileName.length() - 4);
+                strFileList[countList++] = currFileName.substring(0, currFileName.length() - lenExt);
         }
         return Arrays.copyOf(strFileList, countList);
     }
-*/
+
+    public static File getSubFolder(File in, String folderName) {
+        String absolutePath = (in == null) ? null : in.getAbsolutePath();
+        return new File(absolutePath + File.separator + folderName);
+    }
+
+    public static File getParentFolderIfExists(File in) {
+        File res = (in != null) ? in.getParentFile() : null;
+        return (res == null) ? in : res;
+    }
+
+    public static String getOuterResourceAbsolutePath(String fileName) {
+        return (new File(packageAbsolutePath + File.separator + fileName)).getAbsolutePath();
+    }
+
+    public static File getPackageFolder() {
+        return new File(packageAbsolutePath);
+    }
+
+    private static String getFullFileName(String fileName) {
+        StringBuilder fullName = new StringBuilder(packageAbsolutePath);
+        fullName.append(File.separator).append(DEFAULT_RESOURCE_DIRIECTORY);
+        fullName.append(File.separator).append(fileName);
+        return fullName.toString();
+    }
+
+    public static InputStream getResource(String resourceName, String subFolder) throws IOException {
+        return getResource(subFolder + "/" + resourceName);
+    }
+
+    private static InputStream getResource(String resourceName) throws IOException {
+        InputStream result = null;
+        try {
+            result = getOuterResource(resourceName);
+        } catch (IOException e) {
+            logger.debug("Outer resource " + resourceName + " not loaded.", e);
+        }
+        return (result != null) ? result : getInnerResource(resourceName);
+    }
+
+    public static Image loadIcon(String resourceName) throws IOException {
+        return (Image) ImageIO.read(getResource(resourceName));
+    }
+
+    public static void saveData(File file, String data) throws Exception {
+        FileWriter fileWriter = null;
+        try {
+            fileWriter = new FileWriter(file);
+            fileWriter.write(data);
+        } finally {
+            if (fileWriter != null)
+                fileWriter.close();
+        }
+    }
+
+    public static void saveText2File(final String fileName, final String text) throws IOException {
+        saveText2File(fileName, text, WIN_CHARSET);
+    }
+
+    public static void saveText2File(final String fileName, final String text, final String charset) throws IOException {
+        if (charset == null || charset.isEmpty())
+            throw new IOException("Charset not defined");
+
+        File file = new File(fileName);
+
+        if (file.exists())
+            if (!file.delete())
+                throw new IOException("Remove file is not completed.");
+
+        // only delete for empty text
+        if (text == null || text.isEmpty())
+            return;
+
+        Writer writer = null;
+        try {
+            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), charset));
+            writer.write(text);
+        } finally {
+            if (writer != null)
+                writer.close();
+        }
+    }
+
+    public static Properties getResourceProperties(String resourceName) throws IOException {
+        Properties innerProperties = new Properties();
+        Properties outerProperties = new Properties();
+        innerProperties.load(getInnerResource(resourceName));
+        try {
+            outerProperties.load(getOuterResource(resourceName));
+            for (Object key : outerProperties.keySet())
+                innerProperties.setProperty((String) key, outerProperties.getProperty((String) key));
+        } catch (IOException e) {
+            logger.debug("Outer resource " + resourceName + " not loaded.", e);
+        }
+        return innerProperties;
+    }
+
+    static {
+        // (new File(LibFiles.class.getProtectionDomain().getCodeSource().getLocation().getPath())).getParent();
+        ProtectionDomain pd = LibFiles.class.getProtectionDomain();
+        CodeSource cs = pd.getCodeSource();
+        URL url = cs.getLocation();
+        String jarPath = url.getPath();
+        File jarFile = new File(jarPath);
+        packageAbsolutePath = jarFile.getParent();
+        logger.debug("packageAbsolutePath = " + packageAbsolutePath);
+    }
+
 }

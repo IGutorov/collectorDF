@@ -6,9 +6,9 @@ import static com.epam.rcrd.coreDF.PackageConsts.*;
 
 import com.epam.common.igLib.LegendArrayOfNamedObjects;
 import com.epam.common.igLib.LegendTableModel;
-import com.epam.common.igLib.LibFilesNew;
+import com.epam.common.igLib.LibFiles;
 
-import static com.epam.common.igLib.LibFilesNew.*;
+import static com.epam.common.igLib.LibFiles.*;
 import static com.epam.common.igLib.LibFormats.*;
 
 import com.epam.common.igLib.Money100;
@@ -28,8 +28,8 @@ final class TableModelMerger extends AbstractTableModel {
     TableModelMerger(final String legendName, final LegendArrayOfNamedObjects LegendFields, final boolean withSummaryRow)
             throws Exception {
         this.withSummaryRow = withSummaryRow;
-        tableLegend = (LegendTableModel) convertXMLToObject(
-                LibFilesNew.getResource(DESIGN_DIRECTORY + "/" + legendName /*, DESIGN_DIRECTORY*/), null, LegendTableModel.class);
+        tableLegend = (LegendTableModel) convertXMLToObject(LibFiles.getResource(legendName, DESIGN_DIRECTORY), null,
+                LegendTableModel.class);
         dataFields = LegendFields;
     }
 

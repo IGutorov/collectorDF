@@ -10,34 +10,35 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
-import com.epam.common.igLib.ISaveTrace;
-import com.epam.common.igLib.MapTraces.IUpdateStack;
-import static com.epam.common.igLib.LibFilesNew.*;
+import org.apache.log4j.Logger;
+
+import com.epam.common.igLib.CustomLogger;
+
+import static com.epam.common.igLib.LibFiles.*;
 
 import com.epam.rcrd.coreDF.IConnectionsSetter;
-import com.epam.rcrd.coreDF.IConnectionsCore.NumberConnection;
+import static com.epam.rcrd.coreDF.IConnectionsCore.NumberConnection.*;
 import com.epam.rcrd.coreDF.StartDF;
-import com.epam.rcrd.swingDF.JPanelConnect.ICheckConnections;
+
 import static com.epam.rcrd.swingDF.AddComponent.*;
 
-final class DeltafactMainForm implements IUpdateStack, ICheckConnections {
+final class DeltafactMainForm {
 
     private static final String DEFAULT_APP_TITLE = "Deltafact";
 
-    private final JTabbedPane mainTabbedPane = new JTabbedPane(JTabbedPane.NORTH, JTabbedPane.WRAP_TAB_LAYOUT);
-    private final JTextArea   jAreaConsole   = new JTextArea("");
+    private static final Logger logger            = CustomLogger.getDefaultLogger();
 
-    private final IConnectionsSetter connectionsSetter;
+    interface AreaConsoleCallBack {
+        void stackUpdated(Object identObject);
+    }
 
-    DeltafactMainForm() throws Exception {
-        connectionsSetter = StartDF.getConnectionsSetter();
-        ISaveTrace mainTrace = connectionsSetter.registerReDrawer(this);
+    DeltafactMainForm() {
 
+        JTextArea jAreaConsole = new JTextArea("");
+        MainTabbedPane mainTabbedPane = new MainTabbedPane(jAreaConsole);
+        IConnectionsSetter connectionsSetter = StartDF.getConnectionsSetter();
         final JFrame frame = new JFrame(getDefaultStr("Application.title", DEFAULT_APP_TITLE));
 
         // icon
@@ -47,15 +48,8 @@ final class DeltafactMainForm implements IUpdateStack, ICheckConnections {
             if (icon != null)
                 frame.setIconImage(icon);
         } catch (IOException e) {
-            mainTrace.saveException(e);
+            logger.info("icon.png not loaded.", e);
         }
-
-        mainTabbedPane.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent event) {
-                setCurrentTrace();
-            }
-        });
 
         // GUI components (created and forgotten)
         final JSplitPane splitConnect1 = getNewSplitter();
@@ -64,11 +58,9 @@ final class DeltafactMainForm implements IUpdateStack, ICheckConnections {
         final JLabel labelVersion = new JLabel("Version : " + getDefaultStr("Application.version", "???"));
 
         // design (part 1)
-        splitConnect1.setTopComponent(
-                new JPanelConnect(NumberConnection.FIRST_CONNECTION, connectionsSetter, mainTrace, this));
+        splitConnect1.setTopComponent(new JPanelConnect(FIRST_CONNECTION, connectionsSetter, mainTabbedPane));
         splitConnect1.setBottomComponent(splitConnect2);
-        splitConnect2.setTopComponent(
-                new JPanelConnect(NumberConnection.SECOND_CONNECTION, connectionsSetter, mainTrace, this));
+        splitConnect2.setTopComponent(new JPanelConnect(SECOND_CONNECTION, connectionsSetter, mainTabbedPane));
         splitConnect2.setBottomComponent(mainTabbedPane);
 
         // design (part 2)
@@ -91,33 +83,11 @@ final class DeltafactMainForm implements IUpdateStack, ICheckConnections {
         frame.setVisible(true);
     }
 
-    private void setCurrentTrace() {
-        connectionsSetter.setCurrentMergePage(mainTabbedPane.getSelectedComponent());
-    }
-
     private String getDefaultStr(final String propertyName, final String defaultValue) {
         String result = PackageProperties.getProperty(propertyName);
         if (!result.isEmpty())
             return result;
         else
             return defaultValue;
-    }
-
-    @Override
-    public void uploadStack(String stack) {
-        jAreaConsole.setText(stack);
-    }
-
-    @Override
-    public void addToStack(String addStack) {
-        uploadStack(jAreaConsole.getText() + addStack);
-    }
-
-    @Override
-    public void callBack() throws Exception {
-        if (!connectionsSetter.checkBothConnections())
-            return;
-        addNewMergeTabs(mainTabbedPane, connectionsSetter);
-        setCurrentTrace();
     }
 }

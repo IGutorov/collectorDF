@@ -4,10 +4,11 @@ import java.awt.Color;
 
 import javax.swing.JComboBox;
 import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
 
 import com.epam.rcrd.coreDF.IConnectionsSetter;
 import com.epam.rcrd.coreDF.IMergerStarter.TypeReconciliation;
+import com.epam.rcrd.swingDF.MainTabbedPane;
+
 
 final class AddComponent {
     
@@ -29,13 +30,20 @@ final class AddComponent {
         return result;
     }
 
-    static void addNewMergeTabs(final JTabbedPane mainTabbedPane, final IConnectionsSetter connectionsSetter)
+    static void connectionsIsChecked(MainTabbedPane mainTabbedPane, IConnectionsSetter connectionsSetter) throws Exception {
+        if (!connectionsSetter.checkBothConnections())
+            return;
+        createAvaibleMergeTabs(mainTabbedPane, connectionsSetter);
+        mainTabbedPane.reDrawAreaConsole();
+    }
+    
+    static void createAvaibleMergeTabs(MainTabbedPane mainTabbedPane, IConnectionsSetter connectionsSetter)
             throws Exception {
         for (TypeReconciliation curr : connectionsSetter.getTypes())
-            addNewMergeTab(mainTabbedPane, connectionsSetter, curr);
+            addOneMergeTab(mainTabbedPane, connectionsSetter, curr);
     }
 
-    static MergeTab addNewMergeTab(final JTabbedPane mainTabbedPane, final IConnectionsSetter connectionsSetter,
+    static MergeTab addOneMergeTab(MainTabbedPane mainTabbedPane, final IConnectionsSetter connectionsSetter,
             final TypeReconciliation mainType) throws Exception {
         switch (mainType) {
             case Turns:

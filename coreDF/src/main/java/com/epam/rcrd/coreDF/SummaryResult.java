@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import static com.epam.rcrd.coreDF.PackageConsts.*;
-import static com.epam.common.igLib.LibFilesNew.*;
+import static com.epam.common.igLib.LibFiles.*;
 
 final class SummaryResult implements IGetResultSet {
 
@@ -61,8 +61,6 @@ final class SummaryResult implements IGetResultSet {
         }
     }
 
-    // linked ?? default sort ??
-    // private final Map<PairCriteria, LineSummaryResult> mainTab = new LinkedHashMap<PairCriteria, LineSummaryResult>(16, 0.75f, true);
     private final Map<PairCriteria, LineSummaryResult> mainTab = new HashMap<PairCriteria, LineSummaryResult>();
     
     private static final IParamPutGet[] EMPTY_SUMMARYLIST = new IParamPutGet[] {};

@@ -4,12 +4,12 @@ public class PackageProperties extends PackagePropertiesImpl {
 
     private static final String PROPERTIES_PATH = "properties/igLib.properties";
 
-    public static String getProperty(String param) {
-        return getProperty(PROPERTIES_PATH, param);
-    }
-
     static String getStats() {
         return getStats(PROPERTIES_PATH);
+    }
+
+    public static String getProperty(String param) {
+        return getProperty(PROPERTIES_PATH, param);
     }
 
     // sample of use

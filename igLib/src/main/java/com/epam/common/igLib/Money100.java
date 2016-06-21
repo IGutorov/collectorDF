@@ -2,6 +2,7 @@ package com.epam.common.igLib;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import static com.epam.common.igLib.LibFormats.*;
 
 public final class Money100 implements Comparable<Money100> {    
 
@@ -46,7 +47,7 @@ public final class Money100 implements Comparable<Money100> {
 
     @Override
     public String toString() {
-        return LibFormats.longToStrWithDelimiter(value, radixPoint);
+        return longToStrWithDelimiter(value, radixPoint);
     }
 
     @Override

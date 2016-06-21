@@ -5,8 +5,8 @@ import static com.epam.rcrd.coreDF.PackageConsts.*;
 
 import java.sql.SQLException;
 
-import com.epam.common.igLib.ISaveTrace;
-import com.epam.common.igLib.LibFormats;
+import org.apache.log4j.Logger;
+
 import com.epam.rcrd.coreDF.Merger.IRunQuery;
 import com.epam.rcrd.coreDF.PackageConsts.ConnectionSide;
 
@@ -15,8 +15,8 @@ class ComparedResultSetImpl {
     private static class ComparedResultSetRest extends ComparedResultSet {
 
         private ComparedResultSetRest(IRunQuery runQuery, ConnectionSide comparedSide, MergeParams mergeParams,
-                ISaveTrace saveTrace) {
-            super(runQuery, comparedSide, mergeParams, saveTrace);
+                Logger logger) {
+            super(runQuery, comparedSide, mergeParams, logger);
         }
 
         @Override
@@ -42,7 +42,7 @@ class ComparedResultSetImpl {
             if (resourceNumber19.equals(other.resourceNumber19))
                 return 0;
             else
-                return LibFormats.compareString1251(resourceNumber19, other.resourceNumber19);
+                return compareString1251(resourceNumber19, other.resourceNumber19);
         }
 
         @Override
@@ -53,8 +53,8 @@ class ComparedResultSetImpl {
 
     private static class ComparedResultSetTurn extends ComparedResultSet {
         private ComparedResultSetTurn(IRunQuery runQuery, ConnectionSide comparedSide, MergeParams mergeParams,
-                ISaveTrace saveTrace) {
-            super(runQuery, comparedSide, mergeParams, saveTrace);
+                Logger logger) {
+            super(runQuery, comparedSide, mergeParams, logger);
         }
 
         @Override
@@ -97,7 +97,7 @@ class ComparedResultSetImpl {
                 return (int) (turnCharType) - (int) (other.turnCharType);
 
             if (!resourceNumber19.equals(other.resourceNumber19))
-                return LibFormats.compareString1251(resourceNumber19, other.resourceNumber19);
+                return compareString1251(resourceNumber19, other.resourceNumber19);
 
             return compareFetchKeyDoc(other);
         }
@@ -139,8 +139,8 @@ class ComparedResultSetImpl {
 
     private static class ComparedResultSetDoc extends ComparedResultSet {
         private ComparedResultSetDoc(IRunQuery runQuery, ConnectionSide comparedSide, MergeParams mergeParams,
-                ISaveTrace saveTrace) {
-            super(runQuery, comparedSide, mergeParams, saveTrace);
+                Logger logger) {
+            super(runQuery, comparedSide, mergeParams, logger);
         }
 
         @Override
@@ -154,11 +154,11 @@ class ComparedResultSetImpl {
         }
 
         @Override
-        protected String[] getQueryParams() {
+        protected Object[] getQueryParams() {
             if (mergeParams.checkHiddenParam("typeDoc"))
                 return super.getQueryParams();
             else
-                return new String[] { getStrDate112(mergeParams.getCalcDate()), mergeParams.getTransportTypeDoc() };
+                return new Object[] { getStrDate112(mergeParams.getCalcDate()), mergeParams.getTransportTypeDoc() };
         }
 
         @Override
@@ -225,7 +225,7 @@ class ComparedResultSetImpl {
             try {
                 return resultSet.getTimestamp("INDATETIME").getTime() / 1000;
             } catch (SQLException e) {
-                saveTrace.saveException(e);
+                logger.error("Error getInDateTime", e);                
                 return 0;
             }
         }
@@ -234,8 +234,8 @@ class ComparedResultSetImpl {
     @SuppressWarnings("unused") // not yet
     private static class ComparedResultSetAccount extends ComparedResultSet {
         private ComparedResultSetAccount(IRunQuery runQuery, ConnectionSide comparedSide, MergeParams mergeParams,
-                ISaveTrace saveTrace) {
-            super(runQuery, comparedSide, mergeParams, saveTrace);
+                Logger logger) {
+            super(runQuery, comparedSide, mergeParams, logger);
         }
 
         @Override
@@ -259,15 +259,15 @@ class ComparedResultSetImpl {
     }
 
     static ComparedResultSet getComparedResultSet(IRunQuery runQuery, ConnectionSide comparedSide,
-            MergeParams mergeParams, ISaveTrace saveTrace) {
+            MergeParams mergeParams, Logger logger) {
         switch (mergeParams.getType()) {
             case AccountBalance:
-                return new ComparedResultSetRest(runQuery, comparedSide, mergeParams, saveTrace);
+                return new ComparedResultSetRest(runQuery, comparedSide, mergeParams, logger);
             case Turns:
-                return new ComparedResultSetTurn(runQuery, comparedSide, mergeParams, saveTrace);
+                return new ComparedResultSetTurn(runQuery, comparedSide, mergeParams, logger);
             case Documents:
-                return new ComparedResultSetDoc(runQuery, comparedSide, mergeParams, saveTrace);
-            // case AccountStatement: return new ComparedResultSetAccount(runQuery, comparedSide, mergeParams, saveTrace);
+                return new ComparedResultSetDoc(runQuery, comparedSide, mergeParams, logger);
+            // case AccountStatement: return new ComparedResultSetAccount(runQuery, comparedSide, mergeParams, logger);
             default:
                 return null;
 

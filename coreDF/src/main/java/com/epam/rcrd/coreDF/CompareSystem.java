@@ -1,6 +1,5 @@
 package com.epam.rcrd.coreDF;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -8,12 +7,18 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.epam.common.igLib.LibFilesNew;
-import com.epam.common.igLib.LibFormats;
+import org.apache.log4j.Logger;
+
+import static com.epam.common.igLib.LibFiles.*;
+import static com.epam.common.igLib.LibFormats.*;
+
+import com.epam.common.igLib.CustomLogger;
 import com.epam.rcrd.coreDF.CompareSystemList.OnePairSystem;
 import com.epam.rcrd.coreDF.IMergerStarter.TypeReconciliation;
 
 class CompareSystem {
+
+    private static final Logger logger = CustomLogger.getDefaultLogger();
 
     interface IOnePairRecType {
         String getGeneralSQL();
@@ -271,7 +276,7 @@ class CompareSystem {
     private static boolean isInitialize = false;
 
     private static void addPairsSystem(InputStream XML) throws Exception {
-        CompareSystemList prods = (CompareSystemList) LibFormats.convertXMLToObject(XML, null, CompareSystemList.class);
+        CompareSystemList prods = (CompareSystemList) convertXMLToObject(XML, null, CompareSystemList.class);
         for (OnePairSystem curr : prods.getList())
             new OnePairRecType(curr);
     }
@@ -281,18 +286,20 @@ class CompareSystem {
         init();
     }
 
-    static void init() throws Exception {
+    static void init() {
         if (isInitialize)
             return;
 
-        addPairsSystem(LibFilesNew.getInnerResource(PAIRS_RESOURCENAME));
         try {
-            addPairsSystem(LibFilesNew.getOuterResource(PAIRS_RESOURCENAME));
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            // e.printStackTrace();
+            addPairsSystem(getInnerResource(PAIRS_RESOURCENAME));
         } catch (Exception e) {
-            // log.profile ??
+            logger.error("inner CompareSystemList not upload", e);
+        }
+
+        try {
+            addPairsSystem(getOuterResource(PAIRS_RESOURCENAME));
+        } catch (Exception e) {            
+            logger.debug("outer CompareSystemList not upload", e);
         }
         
         isInitialize = true;

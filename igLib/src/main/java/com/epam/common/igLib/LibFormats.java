@@ -9,11 +9,15 @@ import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 import java.util.TimeZone;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import javax.xml.bind.JAXBContext;
@@ -21,7 +25,11 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.transform.stream.StreamSource;
 
+import static com.epam.common.igLib.LibFiles.*;
+
 public final class LibFormats {
+    
+    public static final String EMPTY_STRING = "";
 
     public static final String[] EMPTY_STRING_ARRAY = new String[] {};
 
@@ -102,12 +110,12 @@ public final class LibFormats {
             return sb.append(num);
     }
 
-    private static StringBuilder addTime(StringBuilder sb, GregorianCalendar localeDateTime, boolean withDelimiter) {
+    private static StringBuilder addTime(StringBuilder sb, GregorianCalendar localeDateTime, boolean withDelimeter) {
         sb = addTwoDigits(sb, localeDateTime.get(Calendar.HOUR_OF_DAY));
-        if (withDelimiter)
+        if (withDelimeter)
             sb.append(":");
         sb = addTwoDigits(sb, localeDateTime.get(Calendar.MINUTE));
-        if (withDelimiter)
+        if (withDelimeter)
             sb.append(":");
         sb = addTwoDigits(sb, localeDateTime.get(Calendar.SECOND));        
         return sb;
@@ -247,7 +255,7 @@ public final class LibFormats {
         GregorianCalendar g1 = getGregorianCalendar(null);
         midnight(g1);
         g1.set(Calendar.YEAR, year);
-        g1.set(Calendar.MONTH, month - 1); // WTF
+        g1.set(Calendar.MONTH, month - 1);
         g1.set(Calendar.DAY_OF_MONTH, day);
         return g1.getTime(); // dateFormat104.parse(strDate); // no work ((
     }
@@ -308,7 +316,7 @@ public final class LibFormats {
     }
 
     public static int compareString1251(String current, String other) throws UnsupportedEncodingException {
-        return compareStringCharset(current, other, "cp1251");
+        return compareStringCharset(current, other, WIN_CHARSET);
     }
 
     private static int compareArrayByte(final byte[] current, final byte[] other) {
@@ -367,9 +375,7 @@ public final class LibFormats {
             break;
         }
         convertLong.insert(convertLong.length() - 2, decimalMark); // добавим разделитель целой и дробной части
-        StringBuilder result = convertLong;
-        if (addSpaces)
-            result = addSpacesToAmount(convertLong); // добавим разделители групп-разрядов (пробелы)
+        StringBuilder result = addSpaces ? addSpacesToAmount(convertLong) : convertLong;
         if (negativeNum)
             result.insert(0, "-");
         return result;
@@ -378,7 +384,7 @@ public final class LibFormats {
     public static String longToStrWithDelimiter(long in, char decimalMark) {
         return convertLongToStringBuilderDMark(in, decimalMark, true).toString();
     }
-
+    
     public static String longToStrWithComma(long in) {
         return convertLongToStringBuilderDMark(in, ',', true).toString();
     }
@@ -387,6 +393,31 @@ public final class LibFormats {
         return convertLongToStringBuilderDMark(in, '.', true).toString();
     }
 
+    /**
+     * Возвращает отсортированный объединённый массив неповторяющихся строк
+     * и добавляет к результату пустую строку
+     * 
+     * @param array1
+     * @param array2
+     * @return
+     */
+    public static String[] concatDisticnctArrayString(String[] array1, String[] array2) {
+        return concatDisticnctArrayString(array1, array2, true);
+    }
+
+    public static String[] concatDisticnctArrayString(String[] array1, String[] array2, boolean addEmptyStr) {
+        Set<String> set = new HashSet<String>();
+        if (array1 != null)
+            set.addAll(Arrays.asList(array1));
+        if (array2 != null)
+            set.addAll(Arrays.asList(array2));
+        if (addEmptyStr)
+            set.add(EMPTY_STRING);
+        String[] result = getStringList(set.toArray());
+        Arrays.sort(result);
+        return result;
+    }
+    
     /**
      * Возвращает массив строк(метод toString()) по массиву объектов
      * 
@@ -403,6 +434,10 @@ public final class LibFormats {
         return result;
     }
 
+    public static String getGUID() {
+        return UUID.randomUUID().toString().replace("-", "").toUpperCase();
+    }
+    
     private static Object convertXMLToObject(Reader readerXML, Class<?> objectClass) throws JAXBException {
         StreamSource streamSource = new StreamSource(readerXML);
         return JAXBContext.newInstance(objectClass).createUnmarshaller().unmarshal(streamSource);
@@ -410,13 +445,16 @@ public final class LibFormats {
 
     public static Object convertXMLToObject(InputStream streamXML, String charsetName, Class<?> objectClass) throws JAXBException, UnsupportedEncodingException {
         if (charsetName == null)
-            charsetName = LibFilesNew.UTF_CHARSET;        
-        
+            charsetName = UTF_CHARSET;        
         return convertXMLToObject(new InputStreamReader(streamXML, charsetName), objectClass);
     }
     
     public static Object convertXMLToObject(String stringXML, Class<?> objectClass) throws JAXBException {
         return convertXMLToObject(new StringReader(stringXML), objectClass);
+    }
+    public static Object convert2XMLToObject(String XML, Class<?> objectClass) throws JAXBException {
+        StreamSource streamSource = new StreamSource(new StringReader(XML));
+        return JAXBContext.newInstance(objectClass).createUnmarshaller().unmarshal(streamSource);
     }
 
     public static String convertObjectToXML(Object object) throws JAXBException {
@@ -426,5 +464,4 @@ public final class LibFormats {
         marshaller.marshal(object, stringWriter);
         return stringWriter.toString();
     }
-
 }

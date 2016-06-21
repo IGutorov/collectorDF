@@ -14,8 +14,12 @@
 			<artifactId>igLib</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-		<!-- <dependency> <groupId>oracle</groupId> <artifactId>ojdbc</artifactId> 
-			<version>14_g</version> </dependency> -->
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.16</version>
+			<scope>compile</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

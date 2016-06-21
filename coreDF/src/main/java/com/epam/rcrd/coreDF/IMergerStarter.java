@@ -4,16 +4,18 @@ import static com.epam.rcrd.coreDF.PackageConsts.*;
 
 import javax.swing.table.AbstractTableModel;
 
-import com.epam.common.igLib.ISaveTrace;
+import org.apache.log4j.Logger;
+
 import com.epam.common.igLib.LegendArrayOfNamedObjects;
 import com.epam.rcrd.coreDF.IConnectionsCore.ICallBack;
 import com.epam.rcrd.coreDF.IConnectionsCore.IProgressIndicator;
+
 import static com.epam.common.igLib.LibFormats.*;
 
 public interface IMergerStarter {
 
-    ISaveTrace getNewTrace(Object identTraceObject);
-
+    Logger getLogger();
+    
     boolean isAvailableXls();
 
     void showXls();
@@ -30,7 +32,7 @@ public interface IMergerStarter {
 
     Integer[] getColumnSizes(TableDesign tableDesign);
 
-    void setParam(String param, String value);
+    void setParam(String param, String value) throws Exception;
 
     void mergeGo();
 
@@ -112,9 +114,8 @@ public interface IMergerStarter {
         },
         AccountStatement {
             @Override
-            LegendArrayOfNamedObjects getLegendDataTypes() /* throws Exception */ {
-                // throw new Exception("Type 'AccountStatement' not supported.");
-                return null;
+            LegendArrayOfNamedObjects getLegendDataTypes() {
+                return null; // not supported
             }
 
             @Override

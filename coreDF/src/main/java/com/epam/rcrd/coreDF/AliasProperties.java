@@ -4,12 +4,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import static com.epam.common.igLib.LibFilesNew.*;
-import static com.epam.common.igLib.LibFormatsNew.*;
+import org.apache.log4j.Logger;
+
+import com.epam.common.igLib.CustomLogger;
+
+import static com.epam.common.igLib.LibFiles.*;
+import static com.epam.common.igLib.LibFormats.*;
 
 final class AliasProperties {
 
+    private static final Logger logger = CustomLogger.getDefaultLogger();
+
     private static final String SERVERS_DIRECTORY = "servers";
+    private static final String RESOURCE_WITH_LIST = "servers.list";
 
     private static final String EXTENSION_XML     = "xml";
     private final String        aliasName;
@@ -20,23 +27,28 @@ final class AliasProperties {
 
     AliasProperties(String aliasName, InputStream inputStream) throws Exception {
         if (inputStream == null)
-            throw new Exception("Не заданы параметры соединения с БД.");
+            throw new Exception("Params DB not defined");
         this.aliasName = aliasName;
         this.properties = new Properties();
         this.properties.loadFromXML(inputStream);
     }
 
-    static String[] getAliasPropertiesList() throws IOException {
-        String[] innerStringArray = getStringsFromResource("servers/servers.list");
+    static String[] getAliasPropertiesList() {
+        String[] innerStringArray = null;
+        try {
+            innerStringArray = getStringsFromResource(RESOURCE_WITH_LIST, SERVERS_DIRECTORY);
+        } catch (IOException e) {
+            logger.error(RESOURCE_WITH_LIST + " not uploaded", e);
+        }
         String[] outerStringArray = getOuterResourcesListByExt(SERVERS_DIRECTORY, EXTENSION_XML);
         return concatDisticnctArrayString(innerStringArray, outerStringArray);
     }
 
     static AliasProperties getAliasPropertiesByAliasName(String aliasName) throws Exception {
         if (aliasName == null || aliasName.isEmpty())
-            throw new Exception("Не выбрана System");
+            throw new Exception("System not selected.");
         return new AliasProperties(aliasName,
-                getResource(SERVERS_DIRECTORY + "/" + aliasName + "." + EXTENSION_XML /* , SERVERS_DIRECTORY */));
+                getResource(aliasName + "." + EXTENSION_XML , SERVERS_DIRECTORY));
     }
 
     String getFileName() {
@@ -61,7 +73,7 @@ final class AliasProperties {
     void setLogin(final String login) throws Exception {
         this.login = null;
         if (login == null || login.isEmpty())
-            throw new Exception("Не задан login!");
+            throw new Exception("Login is empty");
         else
             this.login = login;
     }
@@ -69,7 +81,7 @@ final class AliasProperties {
     void setPassword(final String password) throws Exception {
         this.password = "";
         if (password == null || password.isEmpty())
-            throw new Exception("Не задан пароль!");
+            throw new Exception("Password is empty");
         else
             this.password = password;
     }

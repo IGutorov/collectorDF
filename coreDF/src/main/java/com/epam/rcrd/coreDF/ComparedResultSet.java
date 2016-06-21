@@ -6,12 +6,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 
+import org.apache.log4j.Logger;
+
 import static com.epam.rcrd.coreDF.PackageConsts.*;
 
-import com.epam.common.igLib.ISaveTrace;
-
 import static com.epam.common.igLib.LibFormats.*;
-import static com.epam.common.igLib.LibFilesNew.*;
+import static com.epam.common.igLib.LibFiles.*;
 
 import com.epam.common.igLib.TimeProfiler;
 import com.epam.rcrd.coreDF.PackageConsts.ConnectionSide;
@@ -21,56 +21,63 @@ abstract class ComparedResultSet extends Thread {
     private final Merger.IRunQuery runQuery;
     protected final ConnectionSide comparedSide;
     protected final MergeParams    mergeParams;
-    protected final ISaveTrace     saveTrace;
+    protected final Logger logger;
     private final String           query;
 
-    private static final String SQL_DIRECTORY = "sql"; 
-    
-    protected ResultSet resultSet;
-    private boolean     successGetResultSet; // ??
+    private static final String    SQL_DIRECTORY        = "sql";
+
+    protected volatile ResultSet   resultSet;
+    private volatile boolean       successGetResultSet;         // ??
 
     // DataSet
-    private boolean firstFetch = true;
-    boolean         isFetched  = false;
+    private boolean                firstFetch           = true;
+    boolean                        isFetched            = false;
 
     // DataSet. Key attribute
-    String resourceNumber19 = null;
-    byte   turnCharType     = 0;
-    String externalID       = null;
+    String                         resourceNumber19     = null;
+    byte                           turnCharType         = 0;
+    String                         externalID           = null;
 
     // (package) DataSet ??. Check attribute
-    long   amount;
-    String docNumber;
-    long   amountDeb;
-    long   amountCre;
-    String accountDeb;
-    String accountCre;
+    long                           amount;
+    String                         docNumber;
+    long                           amountDeb;
+    long                           amountCre;
+    String                         accountDeb;
+    String                         accountCre;
     //    protected boolean hasDebAcc;
     //    protected boolean hasCreAcc;
-    Date   inDateTime = null;
+    Date                           inDateTime           = null;
 
-    String mainCriterion;
-    String secondCriterion;
+    String                         mainCriterion;
+    String                         secondCriterion;
 
-    protected String prevResourceNumber19 = null;
-    protected byte   prevTurnCharType     = 0;
-    protected String prevExternalID       = null;
-    protected String prevDocNumber        = null;
+    protected String               prevResourceNumber19 = null;
+    protected byte                 prevTurnCharType     = 0;
+    protected String               prevExternalID       = null;
+    protected String               prevDocNumber        = null;
 
-    ComparedResultSet(final Merger.IRunQuery runQuery, final ConnectionSide comparedSide, final MergeParams mergeParams,
-            final ISaveTrace saveTrace) {
+    ComparedResultSet(Merger.IRunQuery runQuery, ConnectionSide comparedSide,
+            MergeParams mergeParams, Logger logger) {
         this.runQuery = runQuery;
         this.comparedSide = comparedSide;
         this.mergeParams = mergeParams;
-        this.saveTrace = saveTrace;
+        this.logger = logger;
+
         this.query = getSQLQueryText(comparedSide);
+
+        if (query == null || query.isEmpty()) {
+            logger.error("Query not found = " + comparedSide);
+        }
+        else
+            logger.info("sideQuery = " + comparedSide + " <" + query + ">");
     }
 
     private boolean queryExecute() {
         try {
             resultSet = runQuery.getResultSet(query);
         } catch (SQLException e) {
-            saveTrace.saveException(e);
+            logger.error("Error execute query.", e);
             return false;
         }
         return true;
@@ -90,8 +97,7 @@ abstract class ComparedResultSet extends Thread {
 
         String finishMessage = String.format(mergeParams.getType().getFinishMessageTemplate(),
                 runQuery.getInterfaceProductName());
-        saveTrace.saveMessage("");
-        saveTrace.saveMessage(finishMessage + ((timeProfiler.getTimeInterval()) / 100) / 10.0 + " сек.");
+        logger.info(finishMessage + ((timeProfiler.getTimeInterval()) / 100) / 10.0 + " сек.");
     }
 
     protected long getInDateTime() {
@@ -102,7 +108,7 @@ abstract class ComparedResultSet extends Thread {
         try {
             return resultSet.getLong("DOCID");
         } catch (SQLException e) {
-            saveTrace.saveException(e);
+            logger.error("Error resultSet getDocID", e);
             return 0;
         }
     }
@@ -123,7 +129,7 @@ abstract class ComparedResultSet extends Thread {
         try {
             return resultSet.getString(columnName);
         } catch (SQLException e) {
-            saveTrace.saveException(e);
+            logger.error("Error resultSet getString", e);
             return null;
         }
     }
@@ -182,31 +188,25 @@ abstract class ComparedResultSet extends Thread {
         }
     }
 
-    protected String[] getQueryParams() {
-        return new String[] { getStrDate112(mergeParams.getCalcDate()) };
+    protected Object[] getQueryParams() {
+        return new Object[] { getStrDate112(mergeParams.getCalcDate()) };
     }
 
     private String getSQLQueryText(final ConnectionSide comparedSide) {
 
-
-        String templateQuery = null; 
+        String templateQuery = null;
         try {
-            InputStream inputStream = getResource(SQL_DIRECTORY + "/" + getQueryFileName(comparedSide) /* , SQL_DIRECTORY*/ );
+            InputStream inputStream = getResource(getQueryFileName(comparedSide), SQL_DIRECTORY);
             templateQuery = getResourceAsString(inputStream, WIN_CHARSET);
         } catch (IOException e) {
-            saveTrace.saveException(e);
+            logger.error("Error get sql query", e);
         }
 
         if (templateQuery == null || templateQuery.isEmpty()) {
-            saveTrace.saveMessage("Query not found = " + comparedSide);
             return null;
         }
-        
-        String resultQuery = String.format(templateQuery, (Object[]) getQueryParams());
 
-        saveTrace.saveMessage("sideQuery = " + comparedSide + " <" + resultQuery + ">");
-
-        return resultQuery;
+        return String.format(templateQuery, getQueryParams());
     }
 
     private int innerFetchAndCheckKey() throws Exception {
@@ -249,7 +249,7 @@ abstract class ComparedResultSet extends Thread {
                 resultSet.close();
             runQuery.closeStatement();
         } catch (SQLException e) {
-            saveTrace.saveMessageWithException("Ошибка выполнения запроса resultSet.close()", e);
+            logger.error("Error resultSet.close()", e);
         }
     }
 }

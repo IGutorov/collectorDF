@@ -3,7 +3,6 @@ package com.epam.rcrd.swingDF;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 
 import static com.epam.common.igLib.LibFormats.*;
 import com.epam.rcrd.coreDF.IConnectionsSetter;
@@ -15,7 +14,7 @@ final class MergeTabTurn extends MergeTab {
 
     private JFormattedTextField calcDateTurn;
 
-    MergeTabTurn(JTabbedPane mainTabbedPane, IConnectionsSetter connectionsSetter) throws Exception {
+    MergeTabTurn(MainTabbedPane mainTabbedPane, IConnectionsSetter connectionsSetter) throws Exception {
         super(mainTabbedPane, connectionsSetter, TypeReconciliation.Turns);
     }
 
@@ -29,7 +28,7 @@ final class MergeTabTurn extends MergeTab {
         try {
             calcDateTurn = getJFormDateField(getStrDate104(getCurrentDateWithShift(-15))); // после 15:00 - сегодня, до - вчера
         } catch (Exception e) {
-            saveTrace.saveException(e);
+            logger.error("format failed", e);
         }
         jPanelParams.add(new JLabel("Дата : "));
         jPanelParams.add(calcDateTurn);

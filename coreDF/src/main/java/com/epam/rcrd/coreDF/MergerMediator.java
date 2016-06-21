@@ -4,8 +4,9 @@ import java.io.File;
 
 import javax.swing.table.AbstractTableModel;
 
-import com.epam.common.igLib.ISaveTrace;
-import com.epam.common.igLib.MapTraces;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 import com.epam.common.igLib.RunBatFile;
 import com.epam.rcrd.coreDF.CompareSystem.IOnePairRecType;
 import com.epam.rcrd.coreDF.IConnectionsCore.ICallBack;
@@ -13,24 +14,32 @@ import com.epam.rcrd.coreDF.IConnectionsCore.IProgressIndicator;
 
 final class MergerMediator implements IMergerStarter {
 
-    private ICallBack                  callBack;
-    private ISaveTrace                 saveTrace;
-    private IProgressIndicator         progressIndicator;
-    private final ConnectionsStats connectionGetter;
-    private final MergeParams          mergeParams;
+    static volatile int            logCount;
 
-    private static final long DEFAULT_PAUSE = 1500L;  
-    
-    MergerMediator(IOnePairRecType pairType, final ConnectionsStats connectionGetter) throws Exception {
-        this.connectionGetter = connectionGetter;
-        saveTrace = MapTraces.getMainTrace();        
-        mergeParams = new MergeParams(pairType);
+    private final Logger           logger;
+
+    private ICallBack              callBack;
+    private IProgressIndicator     progressIndicator;
+    private final ConnectionsStats connectionGetter;
+    private final MergeParams      mergeParams;
+
+    private static final long      DEFAULT_PAUSE = 1500;
+
+    private synchronized Logger getNewLogger() {
+        return Logger.getLogger("com.epam.MergerNum_" + (++logCount) + "_Log");
     }
 
     @Override
-    public ISaveTrace getNewTrace(Object identTraceObject) {
-        saveTrace = MapTraces.addTrace(identTraceObject);
-        return saveTrace;
+    public Logger getLogger() {
+        return logger;
+    }
+
+    MergerMediator(IOnePairRecType pairType, ConnectionsStats connectionGetter) throws Exception {
+        this.connectionGetter = connectionGetter;
+        logger = getNewLogger();
+        String logLevel = PackageProperties.getProperty("Logger.level").toUpperCase();
+        logger.setLevel(Level.toLevel(logLevel));
+        mergeParams = new MergeParams(pairType);
     }
 
     @Override
@@ -41,12 +50,10 @@ final class MergerMediator implements IMergerStarter {
     @Override
     public void showXls() {
         String absoluteFileName = mergeParams.getAbsoluteFileName();
-        saveTrace.saveMessage(absoluteFileName);
+        logger.info(absoluteFileName);
         if (absoluteFileName != null && !absoluteFileName.isEmpty()) {
-            // Ёто "небезопасный" метод.
-            // –есурс (файл) общий дл€ всех пользователей (и всех инстансов) приложени€. 
-            (new RunBatFile(saveTrace, "resources" + File.separator + "startExcel.bat",
-                    "start excel " + absoluteFileName, DEFAULT_PAUSE)).start();
+            String batFileName = "resources" + File.separator + "startExcel.bat";
+            RunBatFile.startBat(batFileName, "start excel " + absoluteFileName, DEFAULT_PAUSE, logger);
         }
     }
 
@@ -78,23 +85,19 @@ final class MergerMediator implements IMergerStarter {
     @Override
     public void mergeGo() {
         if (!isParamsChecked()) {
-            saveTrace.saveMessage("Ќе определены об€зательные параметры сверки");            
+            logger.error("Ќе определены об€зательные параметры сверки");
             return;
         }
         try {
-            (new Merger(mergeParams, connectionGetter, progressIndicator, saveTrace, callBack)).start();
+            (new Merger(mergeParams, connectionGetter, progressIndicator, logger, callBack)).start();
         } catch (Exception e) {
-            saveTrace.saveException(e);
+            logger.error("Merger not started", e);
         }
     }
 
     @Override
-    public void setParam(String param, String value) {
-        try {
-            mergeParams.setParam(param, value);
-        } catch (Exception e) {
-            saveTrace.saveException(e);
-        }
+    public void setParam(String param, String value) throws Exception {
+        mergeParams.setParam(param, value);
     }
 
     @Override

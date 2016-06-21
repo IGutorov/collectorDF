@@ -18,7 +18,5 @@ public interface IConnectionsSetter extends IConnectionsCore {
 
     String getConnectionOptions(NumberConnection numberConnection);
 
-    void setCurrentMergePage(Object identObj);
-
     EnumSet<TypeReconciliation> getTypes();
 }

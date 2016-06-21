@@ -32,7 +32,7 @@ final class DivergenceDetailArray implements IGetResultSet {
         public Object getObject(final String keyData) {
             int pos = fields.getFieldIndex(keyData);
             if (pos == -1)
-                return ""; // null ??
+                return "";
             return values[pos];
         }
 
