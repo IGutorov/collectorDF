@@ -1,10 +1,11 @@
-package com.epam.rcrd.coreDF;
+package com.epam.rcrd.coreDF.uploadXML;
 
 import java.util.Arrays;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import com.epam.rcrd.coreDF.IMergerStarter.TypeReconciliation;
+
+import com.epam.rcrd.coreDF.IMergerStarterCore.TypeReconciliation;
 
 @XmlRootElement(name = "CompareSystem")
 public class CompareSystemList {
@@ -70,27 +71,27 @@ public class CompareSystemList {
         public OnePairSystem() {
         }
 
-        String getClassicLegendName() {
+        public String getClassicLegendName() {
             return classicLegendName;
         }
 
-        String getMasterSystem() {
+        public String getMasterSystem() {
             return masterSystem;
         }
 
-        String getGeneralSQL() {
+        public String getGeneralSQL() {
             return generalSQL;
         }
 
-        String getSummaryLegendName() {
+        public String getSummaryLegendName() {
             return summaryLegendName;
         }
 
-        String getLegendName() {
+        public String getLegendName() {
             return legendName;
         }
 
-        String getMasterSQL() {
+        public String getMasterSQL() {
             return masterSQL;
         }
 
@@ -98,15 +99,15 @@ public class CompareSystemList {
             return typeRec;
         }
 
-        TypeReconciliation getType() {
+        public TypeReconciliation getType() {
             return type;
         }
 
-        String getGeneralSystem() {
+        public String getGeneralSystem() {
             return generalSystem;
         }
 
-        String getHiddenParams() {
+        public String getHiddenParams() {
             return hiddenParams;
         }
 
@@ -135,7 +136,7 @@ public class CompareSystemList {
         return "CompareSystemList [list=" + Arrays.toString(list) + "]";
     }
 
-    OnePairSystem[] getList() throws Exception {
+    public OnePairSystem[] getList() throws Exception {
         if (list == null)
             throw new Exception("ProductVersionList not initialized.");
         return list;

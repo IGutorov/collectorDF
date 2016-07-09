@@ -4,9 +4,10 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import static com.epam.common.igLib.LibFormats.*;
+import static com.epam.common.igLib.LibDateFormats.*;
+
 import com.epam.rcrd.coreDF.IConnectionsSetter;
-import com.epam.rcrd.coreDF.IMergerStarter.TypeReconciliation;
+import com.epam.rcrd.coreDF.IMergerStarterCore.TypeReconciliation;
 
 final class MergeTabTurn extends MergeTab {
 
@@ -36,7 +37,7 @@ final class MergeTabTurn extends MergeTab {
 
     @Override
     protected void setParams() {
-        setCalcDateParam("" + calcDateTurn.getValue());
+        setCalcDateParam(calcDateTurn.getValue().toString());
     }
 
     @Override

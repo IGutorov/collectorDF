@@ -11,15 +11,16 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.text.JTextComponent;
 
 import org.apache.log4j.Logger;
 
 import com.epam.common.igLib.CustomLogger;
 
 import static com.epam.common.igLib.LibFiles.*;
+import static com.epam.rcrd.coreDF.IConnectionsCore.NumberConnection.*;
 
 import com.epam.rcrd.coreDF.IConnectionsSetter;
-import static com.epam.rcrd.coreDF.IConnectionsCore.NumberConnection.*;
 import com.epam.rcrd.coreDF.StartDF;
 
 import static com.epam.rcrd.swingDF.AddComponent.*;
@@ -30,13 +31,10 @@ final class DeltafactMainForm {
 
     private static final Logger logger            = CustomLogger.getDefaultLogger();
 
-    interface AreaConsoleCallBack {
-        void stackUpdated(Object identObject);
-    }
-
     DeltafactMainForm() {
 
-        JTextArea jAreaConsole = new JTextArea("");
+        JTextComponent jAreaConsole = new JTextArea("");
+        jAreaConsole.setEditable(false);
         MainTabbedPane mainTabbedPane = new MainTabbedPane(jAreaConsole);
         IConnectionsSetter connectionsSetter = StartDF.getConnectionsSetter();
         final JFrame frame = new JFrame(getDefaultStr("Application.title", DEFAULT_APP_TITLE));

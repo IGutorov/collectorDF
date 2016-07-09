@@ -9,19 +9,20 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import static com.epam.rcrd.coreDF.PackageConsts.*;
-
+import static com.epam.common.igLib.LibDateFormats.*;
 import static com.epam.common.igLib.LibFormats.*;
 import static com.epam.common.igLib.LibFiles.*;
 
+import com.epam.common.igLib.IConnectorSQL;
 import com.epam.common.igLib.TimeProfiler;
 import com.epam.rcrd.coreDF.PackageConsts.ConnectionSide;
 
 abstract class ComparedResultSet extends Thread {
 
-    private final Merger.IRunQuery runQuery;
+    private final IConnectorSQL    runQuery;
     protected final ConnectionSide comparedSide;
     protected final MergeParams    mergeParams;
-    protected final Logger logger;
+    protected final Logger         logger;
     private final String           query;
 
     private static final String    SQL_DIRECTORY        = "sql";
@@ -34,8 +35,8 @@ abstract class ComparedResultSet extends Thread {
     boolean                        isFetched            = false;
 
     // DataSet. Key attribute
-    String                         resourceNumber19     = null;
-    byte                           turnCharType         = 0;
+    protected String               resourceNumber19     = null;
+    protected byte                 turnCharType         = 0;
     String                         externalID           = null;
 
     // (package) DataSet ??. Check attribute
@@ -57,8 +58,7 @@ abstract class ComparedResultSet extends Thread {
     protected String               prevExternalID       = null;
     protected String               prevDocNumber        = null;
 
-    ComparedResultSet(Merger.IRunQuery runQuery, ConnectionSide comparedSide,
-            MergeParams mergeParams, Logger logger) {
+    ComparedResultSet(IConnectorSQL runQuery, ConnectionSide comparedSide, MergeParams mergeParams, Logger logger) {
         this.runQuery = runQuery;
         this.comparedSide = comparedSide;
         this.mergeParams = mergeParams;
@@ -68,8 +68,7 @@ abstract class ComparedResultSet extends Thread {
 
         if (query == null || query.isEmpty()) {
             logger.error("Query not found = " + comparedSide);
-        }
-        else
+        } else
             logger.info("sideQuery = " + comparedSide + " <" + query + ">");
     }
 
@@ -96,7 +95,7 @@ abstract class ComparedResultSet extends Thread {
         successGetResultSet = queryExecute();
 
         String finishMessage = String.format(mergeParams.getType().getFinishMessageTemplate(),
-                runQuery.getInterfaceProductName());
+                runQuery.getConnectorProperty("ProductVersion") + "(" + runQuery.getCurrentDB() + ")");
         logger.info(finishMessage + ((timeProfiler.getTimeInterval()) / 100) / 10.0 + " сек.");
     }
 
@@ -139,7 +138,7 @@ abstract class ComparedResultSet extends Thread {
     }
 
     protected String getKeyValue(String key) throws Exception {
-        String result = runQuery.getKeyValue(resultSet, key); // depends on DBMS
+        String result = runQuery.getAlternativeTypeValue(resultSet, key); // depends on DBMS
         return (result == null) ? "" : result.trim();
     }
 
@@ -156,13 +155,13 @@ abstract class ComparedResultSet extends Thread {
 
     abstract protected int compareFetchKey(ComparedResultSet other) throws Exception;
 
-    abstract protected int compareFetchedValue(ComparedResultSet other);
+    abstract protected DifferenceType compareFetchedValue(ComparedResultSet other);
 
-    protected int compareAmountValue(ComparedResultSet other) {
+    protected DifferenceType compareAmountValue(ComparedResultSet other) {
         if (amount != other.amount)
-            return NOT_EQUAL_AMOUNT;
+            return DifferenceType.NOT_EQUAL_AMOUNT;
         else
-            return EQUALS;
+            return DifferenceType.EQUALS;
     }
 
     protected int compareFetchKeyDoc(ComparedResultSet other) throws Exception {
@@ -173,8 +172,8 @@ abstract class ComparedResultSet extends Thread {
         return 0;
     }
 
-    protected int checkUniqueKey() {
-        return EQUALS;
+    protected DifferenceType checkUniqueKey() {
+        return DifferenceType.EQUALS;
     }
 
     private String getQueryFileName(ConnectionSide comparedSide) {
@@ -209,25 +208,25 @@ abstract class ComparedResultSet extends Thread {
         return String.format(templateQuery, getQueryParams());
     }
 
-    private int innerFetchAndCheckKey() throws Exception {
+    private DifferenceType innerFetchAndCheckKey() throws Exception {
         mainCriterion = getStringResult("MAINCRITERION");
         secondCriterion = getStringResult("SECONDCRITERION");
 
         getFetchedValues();
 
-        final int result = firstFetch ? EQUALS : checkUniqueKey();
+        final DifferenceType result = firstFetch ? DifferenceType.EQUALS : checkUniqueKey();
 
         savePreviousValues();
         return result;
     }
 
-    int nextWithCheckKey() throws Exception {
+    DifferenceType nextWithCheckKey() throws Exception {
         try {
             isFetched = resultSet.next();
             if (isFetched)
                 return innerFetchAndCheckKey();
             else
-                return EQUALS;
+                return DifferenceType.EQUALS;
         } finally {
             firstFetch = false;
         }

@@ -4,10 +4,10 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import static com.epam.common.igLib.LibFormats.*;
+import static com.epam.common.igLib.LibDateFormats.*;
 
 import com.epam.rcrd.coreDF.IConnectionsSetter;
-import com.epam.rcrd.coreDF.IMergerStarter.TypeReconciliation;
+import com.epam.rcrd.coreDF.IMergerStarterCore.TypeReconciliation;
 
 final class MergeTabAccount extends MergeTab {
 
@@ -33,8 +33,8 @@ final class MergeTabAccount extends MergeTab {
         try {
             calcBriefAccount = getJFormTextField("#####" + SEPARATOR_ACC + "###" + SEPARATOR_ACC + "#" + SEPARATOR_ACC
                     + "####" + SEPARATOR_ACC + "#######", '*', null); // 5-3-1-4-7 //
-            calcBeginDateAccount = getJFormDateField(getStrDate104(getFirstDatePreviousYear())); // начало прошлого года
-            calcEndDateAccount = getJFormDateField(getStrDate104(getYesterdayDate())); // вчера
+            calcBeginDateAccount = getJFormDateField(getStrDate104(getFirstDatePreviousYear()));
+            calcEndDateAccount = getJFormDateField(getStrDate104(getYesterdayDate()));
         } catch (Exception e) {
             logger.error("default params failed", e);
         }

@@ -8,7 +8,7 @@ import javax.swing.JTabbedPane;
 import org.apache.log4j.Logger;
 
 import com.epam.common.igLib.CustomLogger;
-import com.epam.rcrd.swingDF.DeltafactMainForm.AreaConsoleCallBack;
+import com.epam.rcrd.swingDF.AreaConsole.AreaConsoleCallBack;
 
 import java.awt.Component;
 import java.io.OutputStream;
@@ -25,7 +25,6 @@ final class MainTabbedPane extends JTabbedPane implements AreaConsoleCallBack {
 
     private final Map<Object, AreaConsole> map              = new HashMap<Object, AreaConsole>();
 
-    //    private final OutputStream os;
     private static final long              serialVersionUID = 1L;
     private final Appender                 defaultAppender;
     private final JTextComponent           jAreaConsole;

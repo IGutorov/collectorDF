@@ -4,10 +4,11 @@ import java.util.Date;
 
 import javax.swing.table.AbstractTableModel;
 
-import com.epam.rcrd.coreDF.IMergerStarter.TableDesign;
-import com.epam.rcrd.coreDF.IMergerStarter.TypeReconciliation;
 import com.epam.rcrd.coreDF.CompareSystem.IOnePairRecType;
-import static com.epam.common.igLib.LibFormats.*;
+import com.epam.rcrd.coreDF.IMergerStarterCore.TableDesign;
+import com.epam.rcrd.coreDF.IMergerStarterCore.TypeReconciliation;
+
+import static com.epam.common.igLib.LibDateFormats.*;
 import static com.epam.rcrd.coreDF.PackageConsts.*;
 
 final class MergeParams {
@@ -40,9 +41,9 @@ final class MergeParams {
         this.type = pairType.getType();
 
         summaryTableModel = TableModelMerger.getTableModelMerger(pairType.getSummaryLegendName(), LEGEND_SUMMARY, true);
-        dataTableModel = TableModelMerger.getTableModelMerger(pairType.getLegendName(), type.getLegendDataTypes(), false);
+        dataTableModel = TableModelMerger.getTableModelMerger(pairType.getLegendName(), pairType.getLegendDataTypes(), false);
         dataClassicTableModel = TableModelMerger.getTableModelMerger(pairType.getClassicLegendName(),
-                type.getLegendDataTypes(), false);
+                pairType.getLegendDataTypes(), false);
     }
 
     boolean isParamsChecked() {
@@ -172,10 +173,6 @@ final class MergeParams {
             startDatePeriod = convertStrToDate(value);
         else if (param.equals("endDatePeriod"))
             endDatePeriod = convertStrToDate(value);
-    }
-
-    void setCalcDate(final Date calcDate) {
-        this.calcDate = calcDate;
     }
 
     void setBalanceA(final boolean balanceA) {

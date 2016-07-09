@@ -1,6 +1,7 @@
 package com.epam.rcrd.coreDF;
 
 import static com.epam.rcrd.coreDF.PackageConsts.*;
+
 import com.epam.common.igLib.Money100;
 
 final class LineSummaryResult implements IParamPutGet {
@@ -70,12 +71,12 @@ final class LineSummaryResult implements IParamPutGet {
         if ("deltaAmount".equals(keyData))
             return new Money100(leftAmount - rightAmount);
 
-        return ""; // null ??
+        return "";
     }
 
     @Override
     public void put(String keyData, Object value) {
-        // impl on SummaryResult
+        // implementation in SummaryResult
     }
 
     @Override

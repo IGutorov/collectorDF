@@ -7,7 +7,7 @@ import com.epam.common.igLib.Money100;
 import com.epam.rcrd.coreDF.CompareSystem.IOnePairRecType;
 import com.epam.rcrd.coreDF.PackageConsts.IParamPutGet;
 
-public class MergeResultsImpl {
+class MergeResultsImpl {
 
     private static class MergeResultsRest extends MergeResults {
         private MergeResultsRest(IOnePairRecType pairType, TableModelMerger dataModel, ComparedResultSet leftCompared,
@@ -16,7 +16,7 @@ public class MergeResultsImpl {
         }
 
         @Override
-        protected String getStrDiffType(final int diffType) {
+        protected String getStrDiffType(DifferenceType diffType) {
             switch (diffType) {
                 case NOT_EXISTS_GL:
                     return "В " + generalProductName + " нет остатка.";
@@ -37,7 +37,7 @@ public class MergeResultsImpl {
         }
 
         @Override
-        protected String getDetailMessage(final int diffType, final IParamPutGet params) {
+        protected String getDetailMessage(DifferenceType diffType, IParamPutGet params) {
             switch (diffType) {
                 case NOT_EXISTS_GL:
                     return getDetailDocParams(rightCompared);
@@ -66,7 +66,7 @@ public class MergeResultsImpl {
         }
 
         @Override
-        protected String getStrDiffType(final int diffType) {
+        protected String getStrDiffType(DifferenceType diffType) {
             switch (diffType) {
                 case NOT_EXISTS_GL:
                     return "В " + generalProductName + " нет оборота";
@@ -93,7 +93,7 @@ public class MergeResultsImpl {
         }
 
         @Override
-        protected String getDetailMessage(final int diffType, final IParamPutGet params) {
+        protected String getDetailMessage(DifferenceType diffType, final IParamPutGet params) {
             switch (diffType) {
                 case NOT_EXISTS_GL:
                 case DUBLICATE_DOC_MASTER:
@@ -123,7 +123,7 @@ public class MergeResultsImpl {
         }
 
         @Override
-        protected String getStrDiffType(final int diffType) {
+        protected String getStrDiffType(DifferenceType diffType) {
             switch (diffType) {
                 case NOT_EXISTS_GL:
                     return "В " + generalProductName + " нет документа";

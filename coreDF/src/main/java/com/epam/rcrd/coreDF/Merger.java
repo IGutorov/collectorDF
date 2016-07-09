@@ -1,57 +1,44 @@
 package com.epam.rcrd.coreDF;
 
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Date;
 
 import org.apache.log4j.Logger;
 
 import static com.epam.rcrd.coreDF.PackageConsts.*;
-import static com.epam.common.igLib.LibFormats.*;
+import static com.epam.common.igLib.LibDateFormats.*;
 
+import com.epam.common.igLib.IConnectorSQL;
 import com.epam.common.igLib.TimeProfiler;
 import com.epam.rcrd.coreDF.IConnectionsCore.ICallBack;
 import com.epam.rcrd.coreDF.IConnectionsCore.IProgressIndicator;
-import com.epam.rcrd.coreDF.IMergerStarter.TableDesign;
+import com.epam.rcrd.coreDF.IMergerStarterCore.TableDesign;
 
 final class Merger extends Thread {
 
-    private ReconciliationConnection GLConnection;
-    private ReconciliationConnection masterConnection;
+    private IConnectorSQL          GLConnection;
+    private IConnectorSQL          masterConnection;
 
-    private ComparedResultSet        leftCompared;
-    private ComparedResultSet        rightCompared;
+    private ComparedResultSet      leftCompared;
+    private ComparedResultSet      rightCompared;
 
-    private MergeResults             mergeResults;
+    private MergeResults           mergeResults;
 
-    private final MergeParams        mergeParams;
-    private final Logger             logger;
-    private final WaitingGetData     waitData;
-    private final ICallBack          callBack;
-    private final ConnectionsStats   connectionGetter;
-    private final boolean            resultSave;
-    private final boolean            logSave;
+    private final MergeParams      mergeParams;
+    private final Logger           logger;
+    private final WaitingGetData   waitData;
+    private final ICallBack        callBack;
+    private final ConnectionsStats connectionGetter;
+    private final boolean          resultSave;
+    private final boolean          logSave;
 
     // ?? summary result sign (move to mergeParams ??)
     // int                      diffCount                  = 0; // количество расхождений (0 - Ок)
     // boolean                  procressIsFailed           = false; // Сверка прервана
 
-    private LoopCounter              loopCounter;
+    private LoopCounter            loopCounter;
 
-    interface IRunQuery {
-        ResultSet getResultSet(String query) throws SQLException;
-
-        void closeStatement() throws SQLException;
-
-        void closeConnection() throws SQLException;
-
-        String getKeyValue(ResultSet resultSet, String key) throws Exception;
-
-        String getInterfaceProductName();
-    }
-
-    private ComparedResultSet getComparedResultSet(final IRunQuery connection, final ConnectionSide comparedSide) {
+    private ComparedResultSet getComparedResultSet(IConnectorSQL connection, ConnectionSide comparedSide) {
         return ComparedResultSetImpl.getComparedResultSet(connection, comparedSide, mergeParams, logger);
     }
 
@@ -65,10 +52,11 @@ final class Merger extends Thread {
             logger.error("Error add fileAppender", e1);
         }
 
-        leftCompared = getComparedResultSet((IRunQuery) GLConnection, ConnectionSide.LEFT);
-        rightCompared = getComparedResultSet((IRunQuery) masterConnection, ConnectionSide.RIGHT);
-        final String mainHeader = mergeParams.getMainHeader(GLConnection.getInterfaceProductName(),
-                masterConnection.getInterfaceProductName());
+        leftCompared = getComparedResultSet(GLConnection, ConnectionSide.LEFT);
+        rightCompared = getComparedResultSet(masterConnection, ConnectionSide.RIGHT);
+        String mainHeader = mergeParams.getMainHeader(GLConnection.getConnectorProperty("ProductVersion") + "("
+                + GLConnection.getCurrentDB() + ")", masterConnection.getConnectorProperty("ProductVersion") + "("
+                + masterConnection.getCurrentDB() + ")");
 
         logger.info(mainHeader);
 
@@ -76,9 +64,9 @@ final class Merger extends Thread {
                 (TableModelMerger) mergeParams.getTableModel(TableDesign.DataTable), leftCompared, rightCompared,
                 mainHeader);
 
-        // ?? //  logger.info("GL SPID: " + GLConnection.getCurrentSPID());
-        // ?? //  logger.info("Master SPID: " + masterConnection.getCurrentSPID());
-        logger.info("!! Process started: " + getStrDate108(new Date()));
+        logger.info("GL SPID: " + GLConnection.getCurrentSPID());
+        logger.info("Master SPID: " + masterConnection.getCurrentSPID());
+        logger.info("!! Process started: " + getStrDate108(getNow()));
 
         TimeProfiler timeProfiler = new TimeProfiler();
 
@@ -156,14 +144,14 @@ final class Merger extends Thread {
         logSave = !PackageProperties.getProperty("FileLog.skipSave").equalsIgnoreCase("true");
     }
 
-    private void saveNewError(final int diffType, final ComparedResultSet currentCompared) throws Exception {
-        if (diffType == NOT_EXISTS_GL || diffType == NOT_EXISTS_MASTER)
+    private void saveNewError(DifferenceType diffType, ComparedResultSet currentCompared) throws Exception {
+        if (diffType == DifferenceType.NOT_EXISTS_GL || diffType == DifferenceType.NOT_EXISTS_MASTER)
             if (!mergeParams.checkCutOffTime(currentCompared.getInDateTime()))
                 return;
 
         loopCounter.addError();
         mergeResults.saveDiff(diffType);
-        mergeResults.addSummaryOneError(currentCompared.mainCriterion, currentCompared.secondCriterion); // ??
+        mergeResults.addSummaryOneError(currentCompared.mainCriterion, currentCompared.secondCriterion);
     }
 
     private void execMainSQLQueries() throws Exception {
@@ -184,8 +172,8 @@ final class Merger extends Thread {
     }
 
     private void fetchNext(final ComparedResultSet currentCompared) throws Exception {
-        int diffType = currentCompared.nextWithCheckKey();
-        if (diffType != EQUALS)
+        DifferenceType diffType = currentCompared.nextWithCheckKey();
+        if (diffType.isError())
             saveNewError(diffType, currentCompared);
         if (currentCompared.isFetched)
             mergeResults.addSummaryResult(currentCompared, 1);
@@ -217,12 +205,13 @@ final class Merger extends Thread {
             throw new Exception("Ошибка выбора параметров. В системах нет данных за выбранную дату.");
         }
 
-        // ?? + first error ??
         if (!leftCompared.isFetched) {
-            throw new Exception("Error. No data GL (left).");
+            saveNewError(DifferenceType.NOT_EXISTS_GL, rightCompared);
+            throw new Exception("Error. No data in genreral system (left).");
         }
         if (!rightCompared.isFetched) {
-            throw new Exception("Error. No data Master (right).");
+            saveNewError(DifferenceType.NOT_EXISTS_MASTER, leftCompared);
+            throw new Exception("Error. No data in master system (right).");
         }
 
         while ((leftCompared.isFetched || rightCompared.isFetched)) {
@@ -232,16 +221,16 @@ final class Merger extends Thread {
             if (fetchSide.isBoth()) {
                 fetchSide = FetchSide.getFetchSide(leftCompared.compareFetchKey(rightCompared));
                 if (fetchSide.isBoth()) {
-                    int diffType = leftCompared.compareFetchedValue(rightCompared);
-                    if (diffType != EQUALS)
+                    DifferenceType diffType = leftCompared.compareFetchedValue(rightCompared);
+                    if (diffType.isError())
                         saveNewError(diffType, leftCompared);
                 }
             }
 
             if (fetchSide == FetchSide.RIGHT)
-                saveNewError(NOT_EXISTS_GL, rightCompared);
+                saveNewError(DifferenceType.NOT_EXISTS_GL, rightCompared);
             if (fetchSide == FetchSide.LEFT)
-                saveNewError(NOT_EXISTS_MASTER, leftCompared);
+                saveNewError(DifferenceType.NOT_EXISTS_MASTER, leftCompared);
 
             fetchNext(fetchSide);
 

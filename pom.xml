@@ -10,6 +10,6 @@
   <module>igLib</module>
   <module>coreDF</module>
   <module>swingDF</module>
-  <module>DeltaStart</module>
+  <module>deltaStart</module>
   </modules>
 </project>

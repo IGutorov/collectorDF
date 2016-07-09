@@ -12,7 +12,7 @@ import com.epam.rcrd.coreDF.CompareSystem.IOnePairRecType;
 import com.epam.rcrd.coreDF.IConnectionsCore.ICallBack;
 import com.epam.rcrd.coreDF.IConnectionsCore.IProgressIndicator;
 
-final class MergerMediator implements IMergerStarter {
+final class MergerMediator implements IMergerStarterExtension {
 
     static volatile int            logCount;
 

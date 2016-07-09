@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.epam.rcrd.coreDF.PackageConsts.*;
+
 import com.epam.common.igLib.LegendArrayOfNamedObjects;
 
 final class DivergenceDetailArray implements IGetResultSet {

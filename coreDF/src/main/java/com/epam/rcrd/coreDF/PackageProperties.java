@@ -1,6 +1,6 @@
 package com.epam.rcrd.coreDF;
 
-public class PackageProperties extends com.epam.common.igLib.PackageProperties {
+class PackageProperties extends com.epam.common.igLib.PackageProperties {
 
     private static final String PROPERTIES_PATH = "properties/coreDF.properties";
 

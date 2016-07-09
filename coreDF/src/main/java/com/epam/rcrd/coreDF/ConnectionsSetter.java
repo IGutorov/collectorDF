@@ -6,9 +6,9 @@ import org.apache.log4j.Logger;
 
 import com.epam.common.igLib.CustomLogger;
 import com.epam.common.igLib.LibFormats;
-import com.epam.rcrd.coreDF.IMergerStarter.TypeReconciliation;
+import com.epam.rcrd.coreDF.IMergerStarterCore.TypeReconciliation;
 
-import static com.epam.rcrd.coreDF.AliasProperties.*;
+import static com.epam.rcrd.coreDF.AliasPropertiesList.*;
 
 // get mediator: StartDF.getConnectionsSetter
 final class ConnectionsSetter implements IConnectionsSetter {
@@ -29,8 +29,7 @@ final class ConnectionsSetter implements IConnectionsSetter {
     }
 
     private String getAliasProperty(final String aliasName, final String param) throws Exception {
-        AliasProperties aliasProperties = getAliasPropertiesByAliasName(aliasName);
-        return aliasProperties.getProperty(param);
+        return getAliasPropertiesByAliasName(aliasName).getProperty(param);
     }
 
     @Override
@@ -58,7 +57,10 @@ final class ConnectionsSetter implements IConnectionsSetter {
     @Override
     public boolean checkSetConnection(NumberConnection numberConnection, String aliasName, String login, String password)
             throws Exception {
-        return checkSetConnInner(numberConnection, aliasName, login, password, false);
+        boolean result = checkSetConnInner(numberConnection, aliasName, login, password, false);
+        if (result)
+            logger.info(connectionProperties.getConnectionOptions(numberConnection));
+        return result;
     }
 
     /*
@@ -79,13 +81,15 @@ final class ConnectionsSetter implements IConnectionsSetter {
             checkSetConnection(NumberConnection.SECOND_CONNECTION, aliasNameSecond);
         }
     */
+
+    /*
     @Override
     public String getConnectionOptions(NumberConnection numberConnection) {
         return connectionProperties.getConnectionOptions(numberConnection);
-    }
+    } */
 
     @Override
-    public IMergerStarter getNewMerger(TypeReconciliation type) throws Exception {
+    public IMergerStarterExtension getNewMerger(TypeReconciliation type) throws Exception {
         if (checkBothConnections()) {
             return new MergerMediator(connectionProperties.getIOnePairRecTypeByType(type), connectionProperties);
         }

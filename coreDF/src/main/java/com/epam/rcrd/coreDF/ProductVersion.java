@@ -4,14 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-
 import org.apache.log4j.Logger;
 
 import static com.epam.common.igLib.LibFiles.*;
 import static com.epam.common.igLib.LibFormats.*;
 
 import com.epam.common.igLib.CustomLogger;
-import com.epam.rcrd.coreDF.ProductVersionList.UploadProductVersion;
+import com.epam.rcrd.coreDF.uploadXML.ProductVersionList;
+import com.epam.rcrd.coreDF.uploadXML.ProductVersionList.UploadProductVersion;
 
 class ProductVersion {
 

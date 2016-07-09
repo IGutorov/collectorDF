@@ -1,27 +1,34 @@
 package com.epam.rcrd.coreDF;
 
-import static com.epam.rcrd.coreDF.PackageConsts.*;
-
 import javax.swing.table.AbstractTableModel;
-
-import org.apache.log4j.Logger;
 
 import com.epam.common.igLib.LegendArrayOfNamedObjects;
 import com.epam.rcrd.coreDF.IConnectionsCore.ICallBack;
 import com.epam.rcrd.coreDF.IConnectionsCore.IProgressIndicator;
 
-import static com.epam.common.igLib.LibFormats.*;
+import static com.epam.rcrd.coreDF.PackageConsts.*;
+import static com.epam.common.igLib.LibDateFormats.*;
 
-public interface IMergerStarter {
+public interface IMergerStarterCore {
+/*
 
-    Logger getLogger();
-    
-    boolean isAvailableXls();
+IConnectionsSetter connectionsSetter = StartDF.getConnectionsSetter();
+connectionsSetter.checkSetConnection(number, getCurrentSystem(), login1.getText(), String.valueOf(password1.getPassword()))
+connectionsSetter.checkSetConnection(number, getCurrentSystem(), login1.getText(), String.valueOf(password1.getPassword()))
+IMergerStarterExtension mergerStarter = connectionsSetter.getNewMerger(TypeReconciliation  mainType)
 
-    void showXls();
+org.apache.log4j.Logger logger = mergerStarter.getLogger();
 
-    boolean checkHiddenParam(String paramName);
+mergerStarter.registerProgressIndicator((IProgressIndicator) progressLabel);
+mergerStarter.registerCallBack((com.epam.rcrd.coreDF.IConnectionsCore.ICallBack) this);
 
+mergerStarter.setParam(String param, String value);
+
+AbstractTableModel tableModel = mergerStarter.getTableModel(tableDesign);   // TableDesign.SummaryTable, TableDesign.DataTable
+
+if (mergerStarter.isParamsChecked()) mergerStarter.mergeGo();
+
+*/
     boolean isParamsChecked();
 
     void registerProgressIndicator(IProgressIndicator progressIndicator);
@@ -29,8 +36,6 @@ public interface IMergerStarter {
     void registerCallBack(ICallBack callBack);
 
     AbstractTableModel getTableModel(TableDesign tableDesign);
-
-    Integer[] getColumnSizes(TableDesign tableDesign);
 
     void setParam(String param, String value) throws Exception;
 
@@ -136,7 +141,7 @@ public interface IMergerStarter {
             }
         };
 
-        public static TypeReconciliation getTypeByString(final String in) {
+        public static TypeReconciliation getTypeByString(String in) {
             if (in == null || in.isEmpty())
                 return null;
             if (PARAM_TURN.equalsIgnoreCase(in))

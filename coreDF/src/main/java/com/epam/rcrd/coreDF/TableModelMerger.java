@@ -2,8 +2,11 @@ package com.epam.rcrd.coreDF;
 
 import javax.swing.table.AbstractTableModel;
 
+import org.apache.log4j.Logger;
+
 import static com.epam.rcrd.coreDF.PackageConsts.*;
 
+import com.epam.common.igLib.CustomLogger;
 import com.epam.common.igLib.LegendArrayOfNamedObjects;
 import com.epam.common.igLib.LegendTableModel;
 import com.epam.common.igLib.LibFiles;
@@ -16,6 +19,8 @@ import com.epam.common.igLib.Money100;
 final class TableModelMerger extends AbstractTableModel {
 
     private static final long               serialVersionUID = 1L;
+
+    private static final Logger logger = CustomLogger.getDefaultLogger();
 
     private final LegendTableModel          tableLegend;
     private final LegendArrayOfNamedObjects dataFields;
@@ -62,10 +67,10 @@ final class TableModelMerger extends AbstractTableModel {
     @Override
     public Class<?> getColumnClass(int columnIndex) {
         if (tableLegend == null || dataFields == null)
-            return String.class; // null ??
+            return String.class;
         Class<?> result = dataFields.getFieldClass(tableLegend.getKeyData(columnIndex));
         if (result == null)
-            System.err.println("Error data tableLegend or dataFields"); // Exception ??
+            logger.info("Error data tableLegend or dataFields.");
         return result;
     }
 

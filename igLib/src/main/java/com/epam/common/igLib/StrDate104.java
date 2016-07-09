@@ -2,25 +2,25 @@ package com.epam.common.igLib;
 
 import java.util.Date;
 
-public final class StrDate104 implements Comparable<StrDate104> {
+import static com.epam.common.igLib.LibDateFormats.*;
+import static com.epam.common.igLib.LibFormats.*;
+
+public final class StrDate104 implements IDate {
 
     private final int yearMonthDay;
 
     public StrDate104(String strDate104) throws Exception {
-        this(LibFormats.getDate104(strDate104));
+        this(getDate104(strDate104));
     }
 
-    public StrDate104(long datetime) {
-        this(new Date(datetime));
+    public StrDate104(long millis) {
+        yearMonthDay = init(getLocalIDate(millis));
     }
 
     public StrDate104(Date date) {
-        int year = LibFormats.getYear(date);
-        int month = LibFormats.getMonth(date);
-        int day  = LibFormats.getDayOfMonth(date);
-        yearMonthDay = init(year, month, day);
+        yearMonthDay = init(getLocalIDate(date));
     }
-    
+
     public StrDate104(int year, int month, int day) {
         year = (year % 10000); // year < 10000
         month = ((month - 1) % 12) + 1; // 1 <= month <= 12
@@ -28,28 +28,25 @@ public final class StrDate104 implements Comparable<StrDate104> {
         yearMonthDay = init(year, month, day);
     }
 
+    private int init(IDate iDate) {
+        return init(iDate.getYear(), iDate.getMonth(), iDate.getDayOfMonth());
+    }
+
     private int init(int year, int month, int day) {
-        return year * 10000 + month * 100 + day; // 22-Jan-2015 -> 20150322
+        return year * 10000 + month * 100 + day; // 22-Jan-2015 -> 20150322 (20_150_322)
     }
 
-    private static void addTwoDigits2SB(StringBuilder stringBuilder, int num) {
-        if (num < 0 || num > 99) {
-            stringBuilder.append("00");
-            return;
-        }
-        if (num < 10)
-            stringBuilder.append("0");
-        stringBuilder.append(num);
-    }
-
+    @Override
     public int getYear() {
         return yearMonthDay % 100;
     }
-    
+
+    @Override
     public int getMonth() {
         return (yearMonthDay / 100) % 100;
     }
-    
+
+    @Override
     public int getDayOfMonth() {
         return yearMonthDay / 10000;
     }
@@ -57,17 +54,19 @@ public final class StrDate104 implements Comparable<StrDate104> {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        addTwoDigits2SB(sb, getYear());
+        addTwoDigits(sb, getYear());
         sb.append(".");
-        addTwoDigits2SB(sb, getMonth());
+        addTwoDigits(sb, getMonth());
         sb.append(".");
         sb.append(getDayOfMonth());
         return sb.toString(); // DD.MM.YYYY
     }
 
     @Override
-    public int compareTo(StrDate104 another) {
-        return (yearMonthDay < another.yearMonthDay ?  -1 : (yearMonthDay == another.yearMonthDay ? 0 : 1));
+    public int compareTo(IDate another) {
+        int anotherYearMonthDay = (another instanceof StrDate104) ? ((StrDate104) another).yearMonthDay : init(
+                another.getYear(), another.getMonth(), another.getDayOfMonth());
+        return (yearMonthDay < anotherYearMonthDay ? -1 : (yearMonthDay == anotherYearMonthDay ? 0 : 1));
     }
 
     @Override

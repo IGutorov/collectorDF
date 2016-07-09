@@ -13,8 +13,10 @@ import static com.epam.common.igLib.LibFiles.*;
 import static com.epam.common.igLib.LibFormats.*;
 
 import com.epam.common.igLib.CustomLogger;
-import com.epam.rcrd.coreDF.CompareSystemList.OnePairSystem;
-import com.epam.rcrd.coreDF.IMergerStarter.TypeReconciliation;
+import com.epam.common.igLib.LegendArrayOfNamedObjects;
+import com.epam.rcrd.coreDF.IMergerStarterCore.TypeReconciliation;
+import com.epam.rcrd.coreDF.uploadXML.CompareSystemList;
+import com.epam.rcrd.coreDF.uploadXML.CompareSystemList.OnePairSystem;
 
 class CompareSystem {
 
@@ -28,6 +30,7 @@ class CompareSystem {
         String getClassicLegendName();
         String getHiddenParams();
         TypeReconciliation getType();
+        LegendArrayOfNamedObjects getLegendDataTypes();
         ProductVersion getGeneralProduct();
         ProductVersion getMasterProduct();
     }
@@ -253,6 +256,11 @@ class CompareSystem {
         @Override
         public String toString() {
             return "OnePairRecType [prodPair=" + prodPair + ", type=" + type + ", pairStats=" + pairStats + "]";
+        }
+
+        @Override
+        public LegendArrayOfNamedObjects getLegendDataTypes() {
+            return type.getLegendDataTypes();
         }
     }
 

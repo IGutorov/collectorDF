@@ -24,7 +24,7 @@ abstract class MergeResults {
         this.leftCompared = leftCompared;
         this.rightCompared = rightCompared;
         this.mainHeader = mainHeader;
-        divDetailArray = new DivergenceDetailArray(pairType.getType().getLegendDataTypes());
+        divDetailArray = new DivergenceDetailArray(pairType.getLegendDataTypes());
         summaryResult = new SummaryResult();
     }
 
@@ -52,9 +52,9 @@ abstract class MergeResults {
         summaryResult.addResultErrCount(mainCriterion, secondCriterion);
     }
 
-    void saveDiff(final int diffType) {
+    void saveDiff(DifferenceType diffType) {
 
-        ComparedResultSet existsCompared = (onlyMaster(diffType)) ? rightCompared : leftCompared;
+        ComparedResultSet existsCompared = (diffType.onlyMaster()) ? rightCompared : leftCompared;
 
         IParamPutGet divParam = divDetailArray.getNewDivergenceDetail();
 
@@ -70,8 +70,8 @@ abstract class MergeResults {
         divParam.put("creResNumber", existsCompared.getResNumber(TURN_CHARTYPE_CREDIT));
         divParam.put("detailMesssage", getDetailMessage(diffType, divParam));
 
-        long leftAmount = getAmount(leftCompared, onlyMaster(diffType));
-        long rightAmount = getAmount(rightCompared, onlyGL(diffType));
+        long leftAmount = getAmount(leftCompared, diffType.onlyMaster());
+        long rightAmount = getAmount(rightCompared, diffType.onlyGeneral());
         long docAmount = (leftAmount == 0) ? rightAmount : leftAmount; // ?? multifund ?? // long docAmount = amount;
 
         divParam.put("docAmount", new Money100(docAmount));
@@ -97,11 +97,11 @@ abstract class MergeResults {
                 + resultSet.getStringResult("FOBRIEF") + "]";
     }
 
-    protected String getDetailMessage(final int diffType, final IParamPutGet params) {
+    protected String getDetailMessage(DifferenceType diffType, final IParamPutGet params) {
         return null;
     }
 
-    abstract protected String getStrDiffType(final int diffType);
+    abstract protected String getStrDiffType(DifferenceType diffType);
 
     protected String getDocDetailMessage(final String objName, final String param1, final String param2) {
         return "Â " + generalProductName + " " + objName + " [" + param1 + "], " + objName + " â " + masterProductName

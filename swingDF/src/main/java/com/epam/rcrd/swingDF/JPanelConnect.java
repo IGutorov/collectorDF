@@ -40,7 +40,7 @@ final class JPanelConnect extends JPanel {
     private final JComboBox      aliasName;                           // java 6 compatible
 
     // @SuppressWarnings("rawtypes") // annotation for Java 7+
-    private JComboBox getJComboBox(String[] aliasList) {
+    static JComboBox getJComboBox(String[] aliasList) {
         return new JComboBox(aliasList);
     }
 
@@ -83,9 +83,8 @@ final class JPanelConnect extends JPanel {
             @Override
             public void actionPerformed(ActionEvent event) {
                 try {
-                    if (connectionsSetter.checkSetConnection(number, getCurrentSystem(), login1.getText(), new String(
-                            password1.getPassword()))) {
-                        logger.info(connectionsSetter.getConnectionOptions(number));
+                    if (connectionsSetter.checkSetConnection(number, getCurrentSystem(), login1.getText(),
+                            String.valueOf(password1.getPassword()))) {
                         disableAll();
                         AddComponent.connectionsIsChecked(mainTabbedPane, connectionsSetter);
                     }

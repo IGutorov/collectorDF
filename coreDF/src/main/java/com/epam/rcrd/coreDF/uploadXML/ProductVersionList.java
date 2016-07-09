@@ -1,4 +1,4 @@
-package com.epam.rcrd.coreDF;
+package com.epam.rcrd.coreDF.uploadXML;
 
 import java.util.Arrays;
 
@@ -31,15 +31,15 @@ public class ProductVersionList {
         public UploadProductVersion() {
         }
 
-        String getSystemName() {
+        public String getSystemName() {
             return systemName;
         }
 
-        String getIdentificationName() {
+        public String getIdentificationName() {
             return identificationName;
         }
 
-        String getShortName() {
+        public String getShortName() {
             return shortName;
         }
 
@@ -60,7 +60,7 @@ public class ProductVersionList {
     public ProductVersionList() {
     }
 
-    UploadProductVersion[] getList() throws Exception {
+    public UploadProductVersion[] getList() throws Exception {
         if (list == null)
             throw new Exception("ProductVersionList not initialized.");
         return list;

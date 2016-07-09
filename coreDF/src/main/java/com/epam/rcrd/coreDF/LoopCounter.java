@@ -6,8 +6,8 @@ class LoopCounter {
     private static final int MAX_COUNT_COMPARED;
     private static final int MAX_COUNT_ERROR;
 
-    private static final int DEFAULT_MAX_COUNT_COMPARED = 20000000; // больше 20 миллионов - это зацикливание
-    private static final int DEFAULT_MAX_COUNT_ERROR    = 50000;    // ограничение "ничего не сходится"
+    private static final int DEFAULT_MAX_COUNT_COMPARED = 20000000; // more than 20 million is infinite loop
+    private static final int DEFAULT_MAX_COUNT_ERROR    = 50000;    // too many differences
     private static final int MIN_COUNT_COMPARED         = 1000;
     private static final int MIN_COUNT_ERROR            = 100;
 

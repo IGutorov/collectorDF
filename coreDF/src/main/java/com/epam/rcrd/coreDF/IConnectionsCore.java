@@ -1,13 +1,18 @@
 package com.epam.rcrd.coreDF;
 
-import com.epam.rcrd.coreDF.IMergerStarter.TypeReconciliation;
+import com.epam.rcrd.coreDF.IMergerStarterCore.TypeReconciliation;
 
 public interface IConnectionsCore {
 
+    // 3. check both (IConnectionsCore)
     boolean checkBothConnections() throws Exception;
 
-    IMergerStarter getNewMerger(TypeReconciliation type) throws Exception;
+    // 5. get starter (IConnectionsCore)
+    IMergerStarterExtension getNewMerger(TypeReconciliation type) throws Exception;
 
+    // quick start
+    // TypeReconciliation.getTypeByString
+    // String aliasName1, String aliasName2, String strTypeRec  
     interface ICallBack {
         void threadCompleted();
     }

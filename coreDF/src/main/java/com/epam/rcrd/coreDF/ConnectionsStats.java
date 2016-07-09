@@ -2,11 +2,16 @@ package com.epam.rcrd.coreDF;
 
 import java.util.EnumSet;
 
-import com.epam.rcrd.coreDF.CompareSystem.ProductPair;
+import com.epam.common.igLib.AdvancedConnectorSQLFactory;
+import com.epam.common.igLib.ConnectorSQLFactory;
+import com.epam.common.igLib.IConnectorPropertyByAlias;
+import com.epam.common.igLib.IConnectorSQL;
 import com.epam.rcrd.coreDF.CompareSystem.IOnePairRecType;
+import com.epam.rcrd.coreDF.CompareSystem.ProductPair;
 import com.epam.rcrd.coreDF.IConnectionsCore.NumberConnection;
-import com.epam.rcrd.coreDF.IMergerStarter.TypeReconciliation;
-import static com.epam.rcrd.coreDF.AliasProperties.*;
+import com.epam.rcrd.coreDF.IMergerStarterCore.TypeReconciliation;
+
+import static com.epam.rcrd.coreDF.AliasPropertiesList.*;
 
 final class ConnectionsStats {
 
@@ -14,13 +19,15 @@ final class ConnectionsStats {
         FORWARD, REVERSE;
     }
 
-    private AliasStats      firstStats  = new AliasStats();
-    private AliasStats      secondStats = new AliasStats();
-    private AliasProperties generalLAliasProperties;
-    private AliasProperties masterAliasProperties;
-    private ProductPair     pair;
-    private String          applicationName;
-    private Direction       direction   = Direction.FORWARD;
+    private static final String       DEFAULT_CHECK_APP_NAME = "DFCheckConn";
+
+    private AliasStats                firstStats             = new AliasStats();
+    private AliasStats                secondStats            = new AliasStats();
+    private IConnectorPropertyByAlias generalLAliasProperties;
+    private IConnectorPropertyByAlias masterAliasProperties;
+    private ProductPair               pair;
+    private String                    applicationName;
+    private Direction                 direction              = Direction.FORWARD;
 
     EnumSet<TypeReconciliation> getTypes() {
         return CompareSystem.getTypesByPair(pair);
@@ -31,26 +38,25 @@ final class ConnectionsStats {
     }
 
     private static class AliasStats {
-        private boolean         aliasChecked;
-        private AliasProperties aliasProperties;
+        private boolean                   aliasChecked;
+        private IConnectorPropertyByAlias aliasProperties;
         // ?? DBProperties -> return checkRC... 
-        private String          serverName;
-        private String          nameDB;
-        private String          productVersionStrIn;
-        private ProductVersion  productVersion;
-        private String          connectionOptions;
+        private String                    serverName;
+        private String                    nameDB;
+        private String                    productVersionStrIn;
+        private ProductVersion            productVersion;
+        private String                    connectionOptions;
 
         private void clear() {
             setStats(null, null, null, null, null);
         }
 
-        private void setStats(final AliasProperties aliasProperties, final ReconciliationConnection rConn)
-                throws Exception {
+        private void setStats(IConnectorPropertyByAlias aliasProperties, IConnectorSQL rConn) {
             setStats(aliasProperties, rConn.getCurrentServer(), rConn.getCurrentDB(), rConn.getProductVersion(),
                     rConn.getConnectionOptions());
         }
 
-        private void setStats(AliasProperties aliasProperties, String serverName, String nameDB,
+        private void setStats(IConnectorPropertyByAlias aliasProperties, String serverName, String nameDB,
                 String productVersionStrIn, String connectionOptions) {
             this.aliasProperties = aliasProperties;
             this.serverName = serverName;
@@ -85,38 +91,31 @@ final class ConnectionsStats {
     boolean checkSetConnection(final NumberConnection numberConnection, final String login, final String password,
             String aliasName) throws Exception {
 
-        // ??
-        // TODO refactoring. Extract getIRunQuery Interface        
+        IConnectorSQL checkConnection = null;
 
-        ReconciliationConnection checkConnection = null;
+        IConnectorPropertyByAlias currentAliasProperties = getAliasPropertiesByAliasName(aliasName);
 
-        AliasProperties currentAliasProperties = getAliasPropertiesByAliasName(aliasName);
-        
         currentAliasProperties.setLogin(login);
         currentAliasProperties.setPassword(password);
         generalLAliasProperties = null;
         masterAliasProperties = null;
 
-        boolean result = false;
         try {
-            // ?? getCurrentServer(), rConn.getCurrentDB(), rConn.getProductVersion(), rConn.getConnectionOptions()
-            checkConnection = ReconciliationConnectionImpl.getReconciliationConnection(currentAliasProperties, null);
-            result = checkConnection.openConnection();
-            if (result) {
-                final AliasStats currentAliasStats = getAliasStats(numberConnection);
-                currentAliasStats.clear();
-                currentAliasStats.setStats(currentAliasProperties, checkConnection); // ??
-                if (firstStats.aliasChecked && secondStats.aliasChecked) {
-                    result = checkBothConnections();
-                    if (!result)
-                        currentAliasStats.clear();
+            checkConnection = getConnectorByAliasFasade(currentAliasProperties, DEFAULT_CHECK_APP_NAME, true);
+            AliasStats currentAliasStats = getAliasStats(numberConnection);
+            currentAliasStats.clear();
+            currentAliasStats.setStats(currentAliasProperties, checkConnection);
+            if (firstStats.aliasChecked && secondStats.aliasChecked) {
+                if (!checkBothConnections()) {
+                    currentAliasStats.clear();
+                    return false;
                 }
             }
         } finally {
-            checkConnection.closeConnection();
+            if (checkConnection != null)
+                checkConnection.closeConnection();
         }
-
-        return result;
+        return true;
     }
 
     boolean checkBothConnections() throws Exception {
@@ -147,12 +146,20 @@ final class ConnectionsStats {
         return true;
     }
 
-    private ReconciliationConnection getNewConnection(final AliasProperties aliasProperties) throws Exception {
-        ReconciliationConnection result = null;
-        if (aliasProperties != null) {
-            result = ReconciliationConnectionImpl.getReconciliationConnection(aliasProperties, applicationName);
-            result.openConnection();
-        }
+    private ConnectorSQLFactory getConnectorSQLFactory() {
+        return AdvancedConnectorSQLFactory.getInstance();
+    }
+    
+    private IConnectorSQL getConnectorByAliasFasade(IConnectorPropertyByAlias aliasProperties, String appName,
+            final boolean checkParams) throws Exception {
+        return getConnectorSQLFactory().getConnectorByAlias(aliasProperties, appName, checkParams);
+    }
+
+    private IConnectorSQL getNewConnection(IConnectorPropertyByAlias aliasProperties) throws Exception {
+        IConnectorSQL result = null;
+        if (aliasProperties != null)
+            result = getConnectorByAliasFasade(aliasProperties, applicationName, true);
+
         return result;
     }
 
@@ -174,11 +181,11 @@ final class ConnectionsStats {
         }
     }
 
-    ReconciliationConnection getNewGeneralConnection() throws Exception {
+    IConnectorSQL getNewGeneralConnection() throws Exception {
         return getNewConnection(generalLAliasProperties);
     }
 
-    ReconciliationConnection getNewMasterConnection() throws Exception {
+    IConnectorSQL getNewMasterConnection() throws Exception {
         return getNewConnection(masterAliasProperties);
     }
 

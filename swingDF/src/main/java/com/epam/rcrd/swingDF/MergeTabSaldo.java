@@ -6,10 +6,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
-import static com.epam.common.igLib.LibFormats.*;
+import static com.epam.common.igLib.LibDateFormats.*;
 
 import com.epam.rcrd.coreDF.IConnectionsSetter;
-import com.epam.rcrd.coreDF.IMergerStarter.TypeReconciliation;
+import com.epam.rcrd.coreDF.IMergerStarterCore.TypeReconciliation;
 
 final class MergeTabSaldo extends MergeTab {
 
@@ -56,7 +56,7 @@ final class MergeTabSaldo extends MergeTab {
         } catch (Exception e) {
             logger.error("setParams failed", e);
         }
-        setCalcDateParam("" + calcDateSaldo.getValue());
+        setCalcDateParam(calcDateSaldo.getValue().toString());
     }
 
     @Override

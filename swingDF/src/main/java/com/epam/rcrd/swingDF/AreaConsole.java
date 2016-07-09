@@ -7,9 +7,12 @@ import java.io.OutputStream;
 import org.apache.log4j.Logger;
 
 import com.epam.common.igLib.CustomLogger;
-import com.epam.rcrd.swingDF.DeltafactMainForm.AreaConsoleCallBack;
 
 class AreaConsole extends OutputStream {
+
+    interface AreaConsoleCallBack {
+        void stackUpdated(Object identObject);
+    }
 
     private static final Logger logger = CustomLogger.getDefaultLogger();
 

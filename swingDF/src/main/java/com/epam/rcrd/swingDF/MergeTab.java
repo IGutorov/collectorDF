@@ -6,8 +6,6 @@ import java.awt.Image;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.awt.event.ActionEvent;
-import java.text.ParseException;
-import java.util.Date;
 import java.util.Enumeration;
 
 import javax.swing.Icon;
@@ -31,15 +29,14 @@ import javax.swing.text.MaskFormatter;
 import org.apache.log4j.Logger;
 
 import static com.epam.common.igLib.LibFiles.*;
-import static com.epam.common.igLib.LibFormats.*;
 
 import com.epam.rcrd.coreDF.IConnectionsSetter;
-import com.epam.rcrd.coreDF.IMergerStarter;
-import com.epam.rcrd.coreDF.IConnectionsCore.IProgressIndicator;
-import com.epam.rcrd.coreDF.IMergerStarter.TableDesign;
+import com.epam.rcrd.coreDF.IMergerStarterExtension;
 import com.epam.rcrd.coreDF.IConnectionsCore.ICallBack;
+import com.epam.rcrd.coreDF.IConnectionsCore.IProgressIndicator;
+import com.epam.rcrd.coreDF.IMergerStarterCore.TableDesign;
 
-import static com.epam.rcrd.coreDF.IMergerStarter.*;
+import static com.epam.rcrd.coreDF.IMergerStarterExtension.*;
 import static com.epam.rcrd.swingDF.AddComponent.*;
 
 abstract class MergeTab implements ICallBack {
@@ -63,7 +60,7 @@ abstract class MergeTab implements ICallBack {
                                                                                    JTabbedPane.WRAP_TAB_LAYOUT);
 
     protected final Logger logger;
-    protected final IMergerStarter                mergerStarter;
+    protected final IMergerStarterExtension                mergerStarter;
 
     //  template method pattern
     protected MergeTab(final MainTabbedPane mainTabbedPane, final IConnectionsSetter connectionsSetter,
@@ -220,26 +217,12 @@ abstract class MergeTab implements ICallBack {
         return result;
     }
 
-    protected void setCalcDateParam(final String strDate) {
+    protected void setCalcDateParam(String strDate) {
         try {
             mergerStarter.setParam("calcDate", strDate); // as is (dd.MM.yyyy)
         } catch (Exception e) {
             logger.error("setCalcDate failed", e);
         }        
-    }
-
-    protected Date getDateFormatTextField(final JFormattedTextField in) {
-        Date result = null;
-        String strDate = (String) in.getValue();
-        if (checkDate104(strDate)) {
-            try {
-                result = getDate104(strDate);
-            } catch (ParseException e) {
-                logger.error("Incorrect date format (DD.MM.YYYY). Value = " + strDate, e);
-            }
-            logger.info("TDate <" + strDate + ">.");
-        }
-        return result;
     }
 
     abstract protected String getPageName();

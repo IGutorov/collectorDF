@@ -1,16 +1,17 @@
 package com.epam.rcrd.swingDF;
 
+import java.awt.Color;
+
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import static com.epam.common.igLib.LibDateFormats.*;
 import static com.epam.common.igLib.LibFormats.*;
 
 import com.epam.rcrd.coreDF.IConnectionsSetter;
-import com.epam.rcrd.coreDF.IMergerStarter.TypeReconciliation;
-
-import static com.epam.rcrd.swingDF.AddComponent.*;
+import com.epam.rcrd.coreDF.IMergerStarterCore.TypeReconciliation;
 
 final class MergeTabDocs extends MergeTab {
 
@@ -52,7 +53,8 @@ final class MergeTabDocs extends MergeTab {
         } catch (Exception e) {
             logger.error("default params failed", e);
         }
-        typeDoc = getJComboBox(getStringList(TransportTypeDoc.values()));
+        typeDoc = JPanelConnect.getJComboBox(getStringList(TransportTypeDoc.values()));
+        typeDoc.setBackground(Color.WHITE);        
         typeDoc.setSelectedItem(TransportTypeDoc.getDefaultValue());
         jPanelParams.add(new JLabel("Дата : "));
         jPanelParams.add(calcDateDocs);
@@ -74,7 +76,7 @@ final class MergeTabDocs extends MergeTab {
 
     @Override
     protected void setParams() {
-        setCalcDateParam("" + calcDateDocs.getValue());
+        setCalcDateParam(calcDateDocs.getValue().toString());
         try {
             mergerStarter.setParam("transportTypeDoc", "" + typeDoc.getSelectedItem());
             mergerStarter.setParam("lagTime", "" + getLagTime());
