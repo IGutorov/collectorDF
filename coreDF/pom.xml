@@ -34,20 +34,6 @@
 						<target>1.6</target>
 					</configuration>
 				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-jar-plugin</artifactId>
-					<configuration>
-						<archive>
-							<manifest>
-								<addClasspath>true</addClasspath>
-							</manifest>
-							<manifestEntries>
-                            <Class-Path>ojdbc14_g.jar sybase_jconn3.jar</Class-Path>          
-                            </manifestEntries>   
-						</archive>
-					</configuration>
-				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
